@@ -7,7 +7,6 @@
 
 int main()
 {
-
     PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"GTA5.exe");
     BrickAssert(processEntry.th32ProcessID != NULL, "Could not find GTA5.exe");
 

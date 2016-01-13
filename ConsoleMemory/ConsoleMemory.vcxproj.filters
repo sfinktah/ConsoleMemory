@@ -53,5 +53,8 @@
     <ClCompile Include="RemotePointer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AOBScanInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

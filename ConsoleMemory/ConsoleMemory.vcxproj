@@ -170,6 +170,7 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AOBScanInfo.cpp" />
     <ClCompile Include="ConsoleMemory.cpp" />
     <ClCompile Include="MemBlock.cpp" />
     <ClCompile Include="MemDump.cpp" />
