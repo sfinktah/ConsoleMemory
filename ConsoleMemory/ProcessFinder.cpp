@@ -10,7 +10,7 @@ namespace ProcessFinder
         PROCESSENTRY32 processEntry = { };
         processEntry.dwSize = sizeof(processEntry);
 
-        assert(Process32First(hProcSnapshot, &processEntry));
+        BrickAssert(Process32First(hProcSnapshot, &processEntry), "Could not get first process");
 
         do
         {
@@ -33,7 +33,7 @@ namespace ProcessFinder
         MODULEENTRY32 moduleEntry = { };
         moduleEntry.dwSize = sizeof(moduleEntry);
 
-        assert(Module32First(hModSnapshot, &moduleEntry));
+        BrickAssert(Module32First(hModSnapshot, &moduleEntry), "Could not get first process module");
 
         do
         {

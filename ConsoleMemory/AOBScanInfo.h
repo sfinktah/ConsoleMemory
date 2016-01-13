@@ -29,17 +29,17 @@ struct AOBScanInfo
             else
             {
                 int iByte = stoi(sByte, nullptr, 16);
-                assert(iByte >= 0 && iByte <= 255);
+                BrickAssert(iByte >= 0 && iByte <= 255, "Byte %i is not between 0 and 255", iByte);
                 patternArr.push_back({BYTE(iByte), FALSE});
             }
         }
     }
 
-    template <size_t S>
-    AOBScanInfo(const char(&pattern)[S]) : AOBScanInfo(std::string(pattern))
-    {
-        
-    }
+    //template <size_t S>
+    //AOBScanInfo(const char(&pattern)[S]) : AOBScanInfo(std::string(pattern))
+    //{
+    //    
+    //}
 
     AOBScanInfo(char* pattern) : AOBScanInfo(std::string(pattern))
     {

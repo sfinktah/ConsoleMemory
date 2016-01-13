@@ -6,9 +6,12 @@
 #pragma once
 
 #include <Windows.h>
+#include <stdio.h>
 #include <cassert>
 
-#define Log(format, ...) printf_s(format, __VA_ARGS__)
+#define Log(format, ...)        \
+printf_s(format, __VA_ARGS__);   \
+printf_s("\n");
 
 #ifdef _DEBUG
 #define LogDebug(format, ...) printf_s(format, __VA_ARGS__)
@@ -16,21 +19,9 @@
 #define LogDebug(format, ...) (void)0
 #endif
 
-template <typename T>
-T ReadRemoteMemory(HANDLE handle, LPVOID ptr)
-{
-    T temp = { };
-    SIZE_T read = {  };
-    BOOL success = ReadProcessMemory(handle, ptr, &temp, sizeof(temp), &read);
-    assert(success && (read == sizeof(temp)));
-    return temp;
-}
+void _BrickAssert(BOOL condition, PCHAR expression, PCHAR file, PCHAR functionName, INT line, PCHAR errorMsg, ...);
 
-template <typename T>
-void WriteRemoteMemory(HANDLE handle, LPVOID ptr, T value)
-{
-    SIZE_T write;
-    BOOL success = WriteProcessMemory(handle, ptr, value, sizeof(value), &write);
-    assert(success && (write == sizeof(value)));
-}
+#define FUNC_INFO __FILE__, __FUNCSIG__, __LINE__
+
+#define BrickAssert(condition, errormsg, ...) _BrickAssert(condition, #condition, FUNC_INFO, errormsg, ##__VA_ARGS__)
 

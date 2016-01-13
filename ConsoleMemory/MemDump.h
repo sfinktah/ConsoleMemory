@@ -30,7 +30,14 @@ class MemDump
 private:
     HANDLE handle;
 public:
-    std::vector<MemBlock*> MemBlockList;
+
+    typedef std::vector<MemBlock*> MemBlockVector;
+
+
+    MemBlockVector MemBlockList;
+
+    typedef MemBlockVector::iterator        pMemBlockIter;
+    typedef MemBlockVector::const_iterator  pConstMemBlockIter;
 
     explicit MemDump(HANDLE pHandle);
     ~MemDump();
@@ -41,6 +48,17 @@ public:
     void FreeBlocks();
     void Free();
     void Print();
+
+    pMemBlockIter begin()
+    {
+        return MemBlockList.begin();
+    }
+
+    pMemBlockIter end()
+    {
+        return MemBlockList.end();
+    }
+    
     BYTE* ToLocalAddress(BYTE* address);
     RPtr AOBScan(AOBScanInfo pattern);
     //RPtr AOBScan(std::string pattern);

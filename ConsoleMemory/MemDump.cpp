@@ -27,7 +27,7 @@ void MemDump::Scan(DWORD protectionFlags)
             {
                 if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
-                    LogDebug("[MemDump][Scan] Copying 0x%I64X (0x%I64X)\n", DWORD64(memInfo.BaseAddress), memInfo.RegionSize);
+                    LogDebug("[MemDump][Scan] Copying 0x%I64X (0x%I64X)", DWORD64(memInfo.BaseAddress), memInfo.RegionSize);
 
                     MemBlock* mB = new MemBlock(handle, memInfo);
                     mB->Update();
@@ -84,21 +84,21 @@ void MemDump::Print()
 {
     MemDumpInfo info = {  };
 
-    for each (const MemBlock* block in MemBlockList)
+    for each (MemBlock* block in MemBlockList)
     {
-        LogDebug("[MemDump][Print] Block 0x%I64X (0x%I64X)\n", DWORD64(block->address), block->size);
+        LogDebug("[MemDump][Print] Block 0x%I64X (0x%I64X)", DWORD64(block->address), block->size);
         info.totalBlockSize += block->size;
         info.blockCount++;
     }
 
-    Log("[MemDump][Print] %I64u Blocks Total. Size: 0x%I64X\n", info.blockCount, info.totalBlockSize);
+    Log("[MemDump][Print] %I64u Blocks Total. Size: 0x%I64X", info.blockCount, info.totalBlockSize);
 }
 
 BYTE* MemDump::ToLocalAddress(BYTE* address)
 {
     DWORD64 addr = DWORD64(address);
 
-    for each (const MemBlock* block in MemBlockList)
+    for each (MemBlock* block in MemBlockList)
     {
         DWORD64 remoteAddr = DWORD64(block->address);
         if ((remoteAddr < addr) && ((remoteAddr + block->size) > addr))
@@ -114,13 +114,13 @@ RPtr MemDump::AOBScan(AOBScanInfo pattern)
 {
     SIZE_T patternLength = pattern.patternArr.size();
 
-    Log("[MemDump][AOBScan] Scanning for %s\n", pattern.tostring().c_str());
+    Log("[MemDump][AOBScan] Scanning for %s", pattern.tostring().c_str());
 
-    for each (const MemBlock* block in MemBlockList)
+    for each (MemBlock* block in MemBlockList)
     {
         if (block->size > patternLength)
         {
-            LogDebug("[MemDump][AOBScan] Scanning Block. Address: 0x%I64X, Size: 0x%I64X\n", DWORD64(block->address), block->size);
+            LogDebug("[MemDump][AOBScan] Scanning Block. Address: 0x%I64X, Size: 0x%I64X", DWORD64(block->address), block->size);
 
             for (DWORD64 i = 0; i < block->size - patternLength; ++i)
             {
@@ -146,11 +146,6 @@ RPtr MemDump::AOBScan(AOBScanInfo pattern)
 
     return RPtr(nullptr, nullptr);
 }
-
-//RPtr MemDump::AOBScan(std::string pattern)
-//{
-//    return AOBScan(AOBScanInfo(pattern));
-//}
 
 HANDLE MemDump::GetHandle()
 {
