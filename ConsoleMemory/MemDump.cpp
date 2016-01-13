@@ -27,7 +27,7 @@ void MemDump::Scan(DWORD protectionFlags)
             {
                 if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
-                    Log("[MemDump][Scan] Copying 0x%I64X (0x%I64X)\n", DWORD64(memInfo.BaseAddress), memInfo.RegionSize);
+                    LogDebug("[MemDump][Scan] Copying 0x%I64X (0x%I64X)\n", DWORD64(memInfo.BaseAddress), memInfo.RegionSize);
 
                     MemBlock* mB = new MemBlock(handle, memInfo);
                     mB->Update();
@@ -80,18 +80,18 @@ void MemDump::Free()
     FreeBlocks();
 }
 
-void MemDump::Dump()
+void MemDump::Print()
 {
-    printf_s("[MemDump][Dump] Total Dump Size: 0x%I64X\n", GetSize());
-
-#if defined(_DEBUG)
+    MemDumpInfo info = {  };
 
     for each (const MemBlock* block in MemBlockList)
     {
-        Log("[MemDump][Dump] Block 0x%I64X (0x%I64X)\n", DWORD64(block->address), block->size);
+        LogDebug("[MemDump][Print] Block 0x%I64X (0x%I64X)\n", DWORD64(block->address), block->size);
+        info.totalBlockSize += block->size;
+        info.blockCount++;
     }
 
-#endif
+    Log("[MemDump][Print] %I64u Blocks Total. Size: 0x%I64X\n", info.blockCount, info.totalBlockSize);
 }
 
 BYTE* MemDump::ToLocalAddress(BYTE* address)
@@ -120,7 +120,7 @@ RPtr MemDump::AOBScan(AOBScanInfo pattern)
     {
         if (block->size > patternLength)
         {
-            Log("[MemDump][AOBScan] Scanning Block. Address: 0x%I64X, Size: 0x%I64X\n", DWORD64(block->address), block->size);
+            LogDebug("[MemDump][AOBScan] Scanning Block. Address: 0x%I64X, Size: 0x%I64X\n", DWORD64(block->address), block->size);
 
             for (DWORD64 i = 0; i < block->size - patternLength; ++i)
             {
@@ -138,7 +138,7 @@ RPtr MemDump::AOBScan(AOBScanInfo pattern)
 
                 if (success)
                 {
-                    return RPtr(handle, block->address + i);
+                    return RPtr(handle, (block->address + i));
                 }
             }
         }
@@ -147,23 +147,25 @@ RPtr MemDump::AOBScan(AOBScanInfo pattern)
     return RPtr(nullptr, nullptr);
 }
 
-RPtr MemDump::AOBScan(std::string pattern)
-{
-    return AOBScan(AOBScanInfo(pattern));
-}
+//RPtr MemDump::AOBScan(std::string pattern)
+//{
+//    return AOBScan(AOBScanInfo(pattern));
+//}
 
 HANDLE MemDump::GetHandle()
 {
     return handle;
 }
 
-SIZE_T MemDump::GetSize()
+MemDumpInfo MemDump::GetInfo()
 {
     SIZE_T size = 0;
+    SIZE_T count = 0;
     for each (MemBlock* block in MemBlockList)
     {
         size += block->size;
+        count++;
     }
-    return size;
+    return { size, count };
 }
 

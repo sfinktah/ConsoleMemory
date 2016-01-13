@@ -8,23 +8,29 @@
 #include <Windows.h>
 #include <cassert>
 
-#if defined(_DEBUG)
 #define Log(format, ...) printf_s(format, __VA_ARGS__)
+
+#ifdef _DEBUG
+#define LogDebug(format, ...) printf_s(format, __VA_ARGS__)
 #else
-#define Log(format, ...) (void)
+#define LogDebug(format, ...) (void)0
 #endif
 
 template <typename T>
 T ReadRemoteMemory(HANDLE handle, LPVOID ptr)
 {
-    T temp;
-    assert(ReadProcessMemory(handle, ptr, &temp, sizeof(temp), nullptr));
+    T temp = { };
+    SIZE_T read = {  };
+    BOOL success = ReadProcessMemory(handle, ptr, &temp, sizeof(temp), &read);
+    assert(success && (read == sizeof(temp)));
     return temp;
 }
 
 template <typename T>
 void WriteRemoteMemory(HANDLE handle, LPVOID ptr, T value)
 {
-    assert(WriteProcessMemory(handle, ptr, value, sizeof(value), nullptr));
+    SIZE_T write;
+    BOOL success = WriteProcessMemory(handle, ptr, value, sizeof(value), &write);
+    assert(success && (write == sizeof(value)));
 }
 

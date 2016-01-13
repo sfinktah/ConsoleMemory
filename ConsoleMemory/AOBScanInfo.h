@@ -13,7 +13,7 @@ struct AOBScanInfo
 {
     std::vector<PatternByte> patternArr;
 
-    explicit AOBScanInfo(std::string pattern)
+    AOBScanInfo(std::string pattern)
     {
         std::stringstream ss;
         ss << pattern;
@@ -33,6 +33,17 @@ struct AOBScanInfo
                 patternArr.push_back({BYTE(iByte), FALSE});
             }
         }
+    }
+
+    template <size_t S>
+    AOBScanInfo(const char(&pattern)[S]) : AOBScanInfo(std::string(pattern))
+    {
+        
+    }
+
+    AOBScanInfo(char* pattern) : AOBScanInfo(std::string(pattern))
+    {
+        
     }
 
     std::string tostring()

@@ -9,7 +9,7 @@
 
 int main()
 {
-    PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"chrome.exe");
+    PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"GTA5.exe");
     assert(processEntry.dwSize != NULL);
     MODULEENTRY32 processModule = ProcessFinder::GetMainModule(processEntry.th32ProcessID);
     assert(processModule.dwSize != NULL);
@@ -17,20 +17,22 @@ int main()
     //assert(processModule.dwSize != NULL);
 
     HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
+    assert(pHandle != nullptr);
 
     MemDump* memDump = new MemDump(pHandle);
 
     memDump->Scan();
 
-    memDump->Dump();
+    memDump->Print();
 
     RPtr tunablesAOBPtr = memDump->AOBScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
-    DWORD64 pointer = tunablesAOBPtr;
 
     //int offset = ReadRemoteMemory<int>(memDump.GetHandle( ), tunablesAOB + 4);
     //BYTE* tunablesPointer = ReadRemoteMemory<BYTE*>(memDump.GetHandle( ), processModule.modBaseAddr + offset + 8);
 
-    //Log("Tunables 0x%I64X", DWORD64(tunablesPointer));
+    RPtr tunablesPointer = RPtr(pHandle, processModule.modBaseAddr + tunablesAOBPtr.Get<int>(4) + 8, { 0 });
+
+    Log("Tunables 0x%I64X", DWORD64(tunablesPointer));
 
     memDump->Free();
 
@@ -40,4 +42,3 @@ int main()
 
     return 0;
 }
-

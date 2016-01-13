@@ -19,6 +19,12 @@ PAGE_GUARD             |\
 PAGE_NOCACHE           |\
 PAGE_WRITECOMBINE       )
 
+struct MemDumpInfo
+{
+    SIZE_T totalBlockSize;
+    SIZE_T blockCount;
+};
+
 class MemDump
 {
 private:
@@ -34,11 +40,11 @@ public:
     void Update();
     void FreeBlocks();
     void Free();
-    void Dump();
+    void Print();
     BYTE* ToLocalAddress(BYTE* address);
     RPtr AOBScan(AOBScanInfo pattern);
-    RPtr AOBScan(std::string pattern);
+    //RPtr AOBScan(std::string pattern);
     HANDLE GetHandle();
-    SIZE_T GetSize();
+    MemDumpInfo GetInfo();
 };
 
