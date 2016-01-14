@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-#include <memoryapi.h>
 #include "MemBlock.h"
 
 MemBlock::MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo) : rPtr(rPtr), size(memInfo.RegionSize), address(uintptr_t(memInfo.BaseAddress))

@@ -7,17 +7,13 @@
 #include "RemotePointer.h"
 
 #define MEM_ALL_ACCESS (\
-PAGE_NOACCESS          |\
 PAGE_READONLY          |\
 PAGE_READWRITE         |\
 PAGE_WRITECOPY         |\
 PAGE_EXECUTE           |\
 PAGE_EXECUTE_READ      |\
 PAGE_EXECUTE_READWRITE |\
-PAGE_EXECUTE_WRITECOPY |\
-PAGE_GUARD             |\
-PAGE_NOCACHE           |\
-PAGE_WRITECOMBINE       )
+PAGE_EXECUTE_WRITECOPY )\
 
 struct MemDumpInfo
 {
@@ -41,7 +37,7 @@ public:
     explicit MemDump(RPtr rPtr);
     //~MemDump();
 
-    void Scan(DWORD protectionFlags = (PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)); // Executable memory should be fine for most scans.
+    void Scan(DWORD protectionFlags = (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)); // Executable memory should be fine for most scans.
     void DeepScan();
     void Update();
     //void FreeBlocks();
@@ -58,7 +54,7 @@ public:
         return MemBlockList.end();
     }
     
-    uintptr_t ToLocalAddress(uintptr_t address);
+    //uintptr_t ToLocalAddress(uintptr_t address);
     uintptr_t AOBScan(AOBScanInfo pattern);
     RPtr GetRPtr();
     MemDumpInfo GetInfo();

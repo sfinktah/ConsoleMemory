@@ -1,6 +1,5 @@
 #pragma once
 
-#include <sstream>
 #include <vector>
 
 struct PatternByte

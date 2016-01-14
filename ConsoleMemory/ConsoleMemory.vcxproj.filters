@@ -44,16 +44,13 @@
     <ClCompile Include="MemBlock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProcessFinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ConsoleMemory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RemotePointer.cpp">
+    <ClCompile Include="AOBScanInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AOBScanInfo.cpp">
+    <ClCompile Include="ProcessFinder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

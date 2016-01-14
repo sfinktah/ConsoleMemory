@@ -4,23 +4,22 @@
 
 #include "MemDump.h"
 #include "ProcessFinder.h"
-#include <array>
 
 int main()
 {
     PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"GTA5.exe");
-    BrickAssert(processEntry.th32ProcessID != NULL, "Could not find GTA5.exe");
+    BrickAssert(processEntry.th32ProcessID != NULL, "Could not find Process");
 
-    while (!processEntry.th32ProcessID)
-    {
-        Sleep(5000);
+    //while (!processEntry.th32ProcessID)
+    //{
+    //    Sleep(5000);
 
-        Log("Searching for GTA5.exe");
+    //    Log("Searching for GTA5.exe");
 
-        processEntry = ProcessFinder::GetProcessFromName(L"GTA5.exe");
-    }
+    //    processEntry = ProcessFinder::GetProcessFromName(L"GTA5.exe");
+    //}
 
-    Log("Found GTA5.exe");
+    //Log("Found GTA5.exe");
 
     MODULEENTRY32 processModule = ProcessFinder::GetMainModule(processEntry.th32ProcessID);
     BrickAssert(processModule.dwSize != NULL, "Could not get main module");
