@@ -13,6 +13,11 @@ struct PatternMask
 {
     std::string pattern;
     std::string mask;
+
+    operator std::string()
+    {
+        return pattern + " " + mask;
+    }
 };
 
 struct AOBScanInfo
@@ -24,7 +29,12 @@ struct AOBScanInfo
 
     AOBScanInfo(char* pattern, char* mask);
 
-    std::string tostring();
+    template <SIZE_T S> AOBScanInfo(char(pattern)[S], char(mask)[S]) : AOBScanInfo(PCHAR(pattern), PCHAR(mask))
+    {
+
+    }
+
+    std::string AOBScanInfo::tostring();
 
     PatternMask tomask();
 };

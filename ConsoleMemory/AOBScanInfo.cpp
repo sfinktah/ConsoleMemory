@@ -1,6 +1,9 @@
 #include "stdafx.h"
 
+#include <iomanip>
+
 #include "AOBScanInfo.h"
+
 
 AOBScanInfo::AOBScanInfo(std::string pattern)
 {
@@ -58,7 +61,7 @@ std::string AOBScanInfo::tostring()
         }
         else
         {
-            ss << std::uppercase << std::hex << int(pattern.byte) << " ";
+            ss << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << int(pattern.byte) << " ";
         }
     }
     return ss.str();
@@ -79,7 +82,7 @@ PatternMask AOBScanInfo::tomask()
         }
         else
         {
-            patternStream << std::uppercase << std::hex << int(pattern.byte);
+            patternStream << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << int(pattern.byte);
             maskStream << "x";
         }
     }

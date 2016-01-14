@@ -14,7 +14,7 @@ printf_s(format, __VA_ARGS__);   \
 printf_s("\n");
 
 #ifdef _DEBUG
-#define LogDebug(format, ...) printf_s(format, __VA_ARGS__)
+#define LogDebug(format, ...) Log(format, __VA_ARGS__)
 #else
 #define LogDebug(format, ...) (void)0
 #endif

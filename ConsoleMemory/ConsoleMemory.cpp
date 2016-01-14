@@ -4,6 +4,7 @@
 
 #include "MemDump.h"
 #include "ProcessFinder.h"
+#include <array>
 
 int main()
 {
@@ -18,7 +19,7 @@ int main()
 
         processEntry = ProcessFinder::GetProcessFromName(L"GTA5.exe");
     }
-  
+
     Log("Found GTA5.exe");
 
     MODULEENTRY32 processModule = ProcessFinder::GetMainModule(processEntry.th32ProcessID);
@@ -27,32 +28,23 @@ int main()
     HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
     BrickAssert(pHandle != nullptr, "Could not get process handle");
 
+    RPtr ptr(pHandle);
+
     MemDump* memDump = new MemDump(pHandle);
 
     memDump->Scan();
 
-    //memDump->Print();
+    //memDump->Print(); 
 
-    RPtr tunablesAOBPtr = memDump->AOBScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
+    AOBScanInfo tunableScan = "48 8B 8C C2 ? ? ? ? 48 85 C9 74 19";
 
-    while (tunablesAOBPtr.pointer == NULL)
-    {
-        memDump->Scan();
-        tunablesAOBPtr = memDump->AOBScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
+    uintptr_t aobResult = memDump->AOBScan(tunableScan);
 
-        Sleep(10000);
-    }
+    uintptr_t aobPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr + ptr.Read<int>(aobResult + 4) + 8));
 
-    //int offset = ReadRemoteMemory<int>(memDump.GetHandle( ), tunablesAOB + 4);
-    //BYTE* tunablesPointer = ReadRemoteMemory<BYTE*>(memDump.GetHandle( ), processModule.modBaseAddr + offset + 8);
-
-    RPtr tunablesPointer = RPtr(pHandle, processModule.modBaseAddr + tunablesAOBPtr.Get<int>(4) + 8, { 0 });
-
-    Log("Tunables 0x%I64X", DWORD64(tunablesPointer));
+    Log("Tunables pointer 0x%I64X", aobPtr);
 
     memDump->Free();
-
-    delete memDump;
 
     CloseHandle(pHandle);
 

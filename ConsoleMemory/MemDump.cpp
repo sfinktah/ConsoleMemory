@@ -27,7 +27,7 @@ void MemDump::Scan(DWORD protectionFlags)
             {
                 if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
-                    LogDebug("[MemDump][Scan] Copying 0x%I64X (0x%I64X)", DWORD64(memInfo.BaseAddress), memInfo.RegionSize);
+                    LogDebug("[MemDump][Scan] Copying 0x%I64X (0x%I64X bytes)", DWORD64(memInfo.BaseAddress), memInfo.RegionSize);
 
                     MemBlock* mB = new MemBlock(handle, memInfo);
                     mB->Update();
@@ -66,13 +66,24 @@ void MemDump::Update()
 
 void MemDump::FreeBlocks()
 {
-    for each (MemBlock* block in MemBlockList)
+    size_t blockCount = 0;
+    size_t totalSize = 0;
+
+    for (MemBlock* block : MemBlockList)
     {
+        blockCount++;
+        totalSize += block->size;
+        LogDebug("[MemDump][Free] Deleted 0x%I64X bytes", block->size);
         block->Free();
         delete block;
     }
 
     MemBlockList.clear();
+
+    if ((blockCount > 0) || (totalSize > 0))
+    {
+        Log("[MemDump][Free] Deleted %I64u blocks. Total Size: 0x%I64X bytes", blockCount, totalSize);
+    }
 }
 
 void MemDump::Free()
@@ -94,7 +105,7 @@ void MemDump::Print()
     Log("[MemDump][Print] %I64u Blocks Total. Size: 0x%I64X", info.blockCount, info.totalBlockSize);
 }
 
-BYTE* MemDump::ToLocalAddress(BYTE* address)
+uintptr_t MemDump::ToLocalAddress(BYTE* address)
 {
     DWORD64 addr = DWORD64(address);
 
@@ -103,14 +114,14 @@ BYTE* MemDump::ToLocalAddress(BYTE* address)
         DWORD64 remoteAddr = DWORD64(block->address);
         if ((remoteAddr < addr) && ((remoteAddr + block->size) > addr))
         {
-            return block->buffer + (addr - remoteAddr);
+            return uintptr_t(block->buffer + (addr - remoteAddr));
         }
     }
 
-    return nullptr;
+    return NULL;
 }
 
-RPtr MemDump::AOBScan(AOBScanInfo pattern)
+uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
 {
     SIZE_T patternLength = pattern.patternArr.size();
 
@@ -138,13 +149,13 @@ RPtr MemDump::AOBScan(AOBScanInfo pattern)
 
                 if (success)
                 {
-                    return RPtr(handle, (block->address + i));
+                    return uintptr_t(block->address + i);
                 }
             }
         }
     }
 
-    return RPtr(nullptr, nullptr);
+    return NULL;
 }
 
 HANDLE MemDump::GetHandle()

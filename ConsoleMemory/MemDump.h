@@ -33,7 +33,6 @@ public:
 
     typedef std::vector<MemBlock*> MemBlockVector;
 
-
     MemBlockVector MemBlockList;
 
     typedef MemBlockVector::iterator        pMemBlockIter;
@@ -59,9 +58,8 @@ public:
         return MemBlockList.end();
     }
     
-    BYTE* ToLocalAddress(BYTE* address);
-    RPtr AOBScan(AOBScanInfo pattern);
-    //RPtr AOBScan(std::string pattern);
+    uintptr_t ToLocalAddress(BYTE* address);
+    uintptr_t AOBScan(AOBScanInfo pattern);
     HANDLE GetHandle();
     MemDumpInfo GetInfo();
 };
