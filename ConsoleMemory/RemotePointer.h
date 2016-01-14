@@ -3,6 +3,8 @@
 #include "initializer_list"
 #include <vector>
 
+#define BufferSize(T) ((512 / sizeof(T)) * 1024)
+
 template <typename T>
 T ReadRemoteMemory(HANDLE handle, uintptr_t ptr, size_t* read = nullptr)
 {
@@ -18,7 +20,7 @@ T ReadRemoteMemory(HANDLE handle, uintptr_t ptr, size_t* read = nullptr)
 template <typename T>
 std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 {
-    T buffer[(512 / sizeof(T)) * 1024] = { };
+    T buffer[BufferSize(T)] = { };
     std::vector<T> vector(size);
     size_t totalRead = 0;
 
@@ -31,7 +33,7 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 
         BrickAssert(success, "Failed to Read Memory Array at 0x%I64X", ptr + totalRead);
 
-        std::copy_n(buffer, read / sizeof(T), (vector.begin() + totalRead));
+        std::copy_n(buffer, read / sizeof(T), vector.begin() + totalRead);
 
         totalRead += toRead;
     }
@@ -52,7 +54,7 @@ void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T value, size_t* wrote = nu
 template <typename T>
 void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> vector)
 {
-    T buffer[512 / sizeof(T) * 1024] = { };
+    T buffer[BufferSize(T)] = { };
     size_t arrSize = vector.size();
     size_t totalWrote = 0;
 
