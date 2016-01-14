@@ -5,16 +5,21 @@
 class MemBlock
 {
 public:
-    RPtr rPtr;
-    size_t size;
-    uintptr_t address;
-    std::vector<byte> buffer;
+
 
     MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo);
 
-    //~MemBlock();
+    RPtr GetRPtr();
+    size_t GetMaxSize();
+    uintptr_t GetRemoteAddress();
+    std::vector<byte> GetDumpArray();
 
-    //void Free();
     void Update();
+
+public:
+    RPtr rPtr;
+    size_t maxSize;
+    uintptr_t remoteAddress;
+    std::vector<byte> dumpArray;
 };
 

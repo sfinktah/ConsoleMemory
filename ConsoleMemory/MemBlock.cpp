@@ -2,14 +2,35 @@
 
 #include "MemBlock.h"
 
-MemBlock::MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo) : rPtr(rPtr), size(memInfo.RegionSize), address(uintptr_t(memInfo.BaseAddress))
+MemBlock::MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo) : rPtr(rPtr), maxSize(memInfo.RegionSize), remoteAddress(uintptr_t(memInfo.BaseAddress))
 {
+}
+
+RPtr MemBlock::GetRPtr()
+{
+    return rPtr;
+}
+
+size_t MemBlock::GetMaxSize()
+{
+    return maxSize;
+}
+
+uintptr_t MemBlock::GetRemoteAddress()
+{
+    return remoteAddress;
+}
+
+std::vector<byte> MemBlock::GetDumpArray()
+{
+    return dumpArray;
 }
 
 void MemBlock::Update()
 {
-    LogDebug("[MemDump][Scan] Copying 0x%I64X (0x%I64X bytes)", address, size);
+    LogDebug("[MemDump][Scan] Copying 0x%I64X (0x%I64X bytes)", remoteAddress, maxSize);
 
-    buffer = rPtr.ReadArray<byte>(address, size);
+    dumpArray = rPtr.ReadArray<byte>(remoteAddress, maxSize);
+    maxSize = dumpArray.size();
 }
 

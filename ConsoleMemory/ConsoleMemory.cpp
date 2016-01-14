@@ -7,7 +7,9 @@
 
 int main()
 {
-    PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"GTA5.exe");
+    system("PAUSE");
+
+    PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"CHROME.exe");
     BrickAssert(processEntry.th32ProcessID != NULL, "Could not find Process");
 
     //while (!processEntry.th32ProcessID)
@@ -29,25 +31,27 @@ int main()
 
     RPtr ptr(pHandle);
 
-    MemDump memDump = MemDump(ptr);
+    MemDump* memDump = new MemDump(ptr);
 
-    memDump.Scan();
+    for (int i = 0; i < 50; i++)
+    {
+        memDump->Print();
+        memDump->Scan();
+    }
 
-    memDump.Print(); 
+    //AOBScanInfo tunableScan = "48 8B 8C C2 ? ? ? ? 48 85 C9 74 19";
 
-    AOBScanInfo tunableScan = "48 8B 8C C2 ? ? ? ? 48 85 C9 74 19";
+    //uintptr_t aobResult = memDump.AOBScan(tunableScan);
 
-    uintptr_t aobResult = memDump.AOBScan(tunableScan);
+    //uintptr_t aobPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr + ptr.Read<int>(aobResult + 4) + 8));
 
-    uintptr_t aobPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr + ptr.Read<int>(aobResult + 4) + 8));
+    //Log("Tunables pointer 0x%I64X", aobPtr);
 
-    Log("Tunables pointer 0x%I64X", aobPtr);
-
-    memDump.Free();
+    memDump->Free();
 
     CloseHandle(pHandle);
 
-    getchar();
+    system("PAUSE");
 
     return 0;
 }

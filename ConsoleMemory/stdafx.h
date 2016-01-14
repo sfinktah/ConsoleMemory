@@ -7,16 +7,13 @@
 
 #include <Windows.h>
 #include <stdio.h>
-#include <cassert>
 
-#define Log(format, ...)        \
-printf_s(format, __VA_ARGS__);   \
-printf_s("\n");
+#define Log(format, ...) printf_s(format, __VA_ARGS__); printf_s("\n");
 
 #ifdef _DEBUG
 #define LogDebug(format, ...) Log(format, __VA_ARGS__)
 #else
-#define LogDebug(format, ...) (void)0
+#define LogDebug(format, ...) (void)0;
 #endif
 
 void _BrickAssert(BOOL condition, PCHAR expression, PCHAR file, PCHAR functionName, INT line, PCHAR errorMsg, ...);

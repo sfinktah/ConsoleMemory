@@ -27,28 +27,6 @@ AOBScanInfo::AOBScanInfo(std::string pattern)
     }
 }
 
-AOBScanInfo::AOBScanInfo(char* pattern) : AOBScanInfo(std::string(pattern))
-{
-
-}
-
-//AOBScanInfo::AOBScanInfo(char* pattern, char* mask)
-//{
-//    size_t length = strlen(mask);
-//
-//    for (size_t i = 0; i < length; ++i)
-//    {
-//        if (mask[i] == '?')
-//        {
-//            patternArr.push_back({ NULL, TRUE });
-//        }
-//        else
-//        {
-//            patternArr.push_back({ BYTE(pattern[i]), FALSE });
-//        }
-//    }
-//}
-
 std::string AOBScanInfo::tostring()
 {
     std::stringstream ss;

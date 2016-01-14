@@ -14,7 +14,7 @@ namespace ProcessFinder
 
         do
         {
-            if (wcscmp(processEntry.szExeFile, processName) == 0)
+            if (_wcsicmp(processEntry.szExeFile, processName) == 0)
             {
                 CloseHandle(hProcSnapshot);
 
@@ -58,6 +58,8 @@ namespace ProcessFinder
         {
             return moduleEntry;
         }
+
+        Log("Could not get main module of process %u", pID);
 
         return { };
     }

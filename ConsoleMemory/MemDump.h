@@ -1,10 +1,12 @@
 #pragma once
 #include <Windows.h>
 #include <vector>
+#include <memory>
 
 #include "MemBlock.h"
 #include "AOBScanInfo.h"
 #include "RemotePointer.h"
+
 
 #define MEM_ALL_ACCESS (\
 PAGE_READONLY          |\
@@ -27,7 +29,8 @@ private:
     RPtr rPtr;
 public:
 
-    typedef std::vector<MemBlock> MemBlockVector;
+    
+    typedef std::vector<std::shared_ptr<MemBlock>> MemBlockVector;
 
     MemBlockVector MemBlockList;
 
@@ -35,12 +38,10 @@ public:
     typedef MemBlockVector::const_iterator  pConstMemBlockIter;
 
     explicit MemDump(RPtr rPtr);
-    //~MemDump();
-
+    ~MemDump();
     void Scan(DWORD protectionFlags = (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)); // Executable memory should be fine for most scans.
     void DeepScan();
     void Update();
-    //void FreeBlocks();
     void Free();
     void Print();
 
@@ -54,7 +55,6 @@ public:
         return MemBlockList.end();
     }
     
-    //uintptr_t ToLocalAddress(uintptr_t address);
     uintptr_t AOBScan(AOBScanInfo pattern);
     RPtr GetRPtr();
     MemDumpInfo GetInfo();
