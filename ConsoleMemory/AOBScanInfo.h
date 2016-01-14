@@ -14,6 +14,6 @@ struct AOBScanInfo
 
     AOBScanInfo(std::string pattern);
 
-    std::string AOBScanInfo::ToString();
+    std::string ToString();
 };
 

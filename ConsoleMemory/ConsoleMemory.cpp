@@ -5,23 +5,14 @@
 #include "MemDump.h"
 #include "ProcessFinder.h"
 
-void dostuff()
+#include <array>
+
+void testdump()
 {
     system("PAUSE");
 
-    PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"CHROME.exe");
+    PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"chrome.exe");
     BrickAssert(processEntry.th32ProcessID != NULL, "Could not find Process");
-
-    //while (!processEntry.th32ProcessID)
-    //{
-    //    Sleep(5000);
-
-    //    Log("Searching for GTA5.exe");
-
-    //    processEntry = ProcessFinder::GetProcessFromName(L"GTA5.exe");
-    //}
-
-    //Log("Found GTA5.exe");
 
     MODULEENTRY32 processModule = ProcessFinder::GetMainModule(processEntry.th32ProcessID);
     BrickAssert(processModule.dwSize != NULL, "Could not get main module");
@@ -33,8 +24,8 @@ void dostuff()
 
     MemDump* memDump = new MemDump(ptr);
 
-    memDump->Print();
     memDump->Scan();
+    memDump->Print();
 
     //AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
 
@@ -49,27 +40,32 @@ void dostuff()
     CloseHandle(pHandle);
 }
 
-int main()
+void testarrayaccess()
 {
     RPtr ptr(GetCurrentProcess());
 
-    int arr[ ] { 10, 5, 2, 1337 };
+    int arr[ ] { 42, 360, 420, 1337 };
 
-    ptr.WriteArray(uintptr_t(&arr), std::vector<int>({ 1, 2, 3 }));
-
-    for (int i = 0; i < 4; ++i)
+    for (int i : arr)
     {
-        printf_s("%i\n", arr[i]);
+        printf_s("%i\n", i);
     }
+
+    ptr.WriteArray<int>(uintptr_t(&arr), { 1, 2, 3, 4 });
 
     std::vector<int> arr2 = ptr.ReadArray<int>(uintptr_t(&arr), 4);
 
     for (int i : arr2)
     {
-        printf_s("arr2 %i\n", i);
+        printf_s("%i\n", i);
     }
+}
 
-    dostuff();
+int main()
+{
+    testarrayaccess();
+
+    testdump();
 
     system("PAUSE");
 

@@ -1,8 +1,6 @@
 #pragma once
 
 #include <Windows.h>
-#include <vector>
-#include <memory>
 
 #include "MemBlock.h"
 #include "AOBScanInfo.h"
@@ -22,8 +20,6 @@ struct MemDumpInfo
     size_t totalBlockSize;
     size_t blockCount;
 };
-
-typedef std::vector<std::shared_ptr<MemBlock>> MemBlockVector;
 
 class MemDump
 {

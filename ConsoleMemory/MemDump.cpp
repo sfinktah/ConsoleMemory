@@ -29,7 +29,7 @@ void MemDump::Scan(DWORD protectionFlags)
             {
                 if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
-                    std::shared_ptr<MemBlock> mB = std::shared_ptr<MemBlock>(new MemBlock(rPtr, memInfo));
+                    MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, memInfo));
                     mB->Update();
                     MemBlockList.push_back(mB);
                 }
@@ -53,7 +53,7 @@ void MemDump::Scan(DWORD protectionFlags)
 
 void MemDump::Update()
 {
-    for (std::shared_ptr<MemBlock> block : MemBlockList)
+    for (MemBlockPtr block : MemBlockList)
     {
         block->Update();
     }
@@ -61,16 +61,21 @@ void MemDump::Update()
 
 void MemDump::Free()
 {
-    Log("[MemDump][Free] Deleting %I64u blocks", MemBlockList.size());
+    size_t size = MemBlockList.size();
 
-    MemBlockList.clear(); // Shared Ptr auto calls MemBlock destructor.
+    if (size > 0)
+    {
+        Log("[MemDump][Free] Deleting %I64u blocks", size);
+
+        MemBlockList.clear(); // Shared Ptr auto calls MemBlock destructor.
+    }
 }
 
 void MemDump::Print()
 {
     MemDumpInfo info = { };
 
-    for (std::shared_ptr<MemBlock> block : MemBlockList)
+    for (MemBlockPtr block : MemBlockList)
     {
         LogDebug("[MemDump][Print] Block 0x%I64X (0x%I64X)", block->remoteAddress, block->maxSize);
         info.totalBlockSize += block->maxSize;
@@ -86,7 +91,7 @@ uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
 
     Log("[MemDump][AOBScan] Scanning for %s", pattern.ToString().c_str());
 
-    for (std::shared_ptr<MemBlock> block : MemBlockList)
+    for (MemBlockPtr block : MemBlockList)
     {
         if (block->maxSize > patternLength)
         {
@@ -127,7 +132,7 @@ MemDumpInfo MemDump::GetInfo()
     size_t size = 0;
     size_t count = 0;
 
-    for (std::shared_ptr<MemBlock> block : MemBlockList)
+    for (MemBlockPtr block : MemBlockList)
     {
         size += block->maxSize;
         count++;

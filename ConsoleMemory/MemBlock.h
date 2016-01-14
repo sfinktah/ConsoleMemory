@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include <memory>
+
 #include "RemotePointer.h"
 
 class MemBlock
@@ -20,4 +23,7 @@ public:
     uintptr_t remoteAddress;
     std::vector<byte> dumpArray;
 };
+
+typedef std::shared_ptr<MemBlock> MemBlockPtr;
+typedef std::vector<MemBlockPtr> MemBlockVector;
 

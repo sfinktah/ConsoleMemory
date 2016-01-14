@@ -31,7 +31,7 @@ std::string AOBScanInfo::ToString()
 {
     std::stringstream ss;
 
-    for each (PatternByte pattern in patternArray)
+    for (PatternByte pattern : patternArray)
     {
         if (pattern.ignore)
         {
@@ -44,25 +44,3 @@ std::string AOBScanInfo::ToString()
     }
     return ss.str();
 }
-
-//PatternMask AOBScanInfo::tomask()
-//{
-//    std::stringstream patternStream;
-//    std::stringstream maskStream;
-//
-//    for each (PatternByte pattern in patternArr)
-//    {
-//        patternStream << "\\x";
-//        if (pattern.ignore)
-//        {
-//            patternStream << "00";
-//            maskStream << "?";
-//        }
-//        else
-//        {
-//            patternStream << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << int(pattern.byte);
-//            maskStream << "x";
-//        }
-//    }
-//    return{ patternStream.str(), maskStream.str() };
-//}
