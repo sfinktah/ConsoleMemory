@@ -30,21 +30,21 @@ int main()
 
     RPtr ptr(pHandle);
 
-    MemDump* memDump = new MemDump(pHandle);
+    MemDump memDump = MemDump(ptr);
 
-    memDump->Scan();
+    memDump.Scan();
 
-    //memDump->Print(); 
+    memDump.Print(); 
 
     AOBScanInfo tunableScan = "48 8B 8C C2 ? ? ? ? 48 85 C9 74 19";
 
-    uintptr_t aobResult = memDump->AOBScan(tunableScan);
+    uintptr_t aobResult = memDump.AOBScan(tunableScan);
 
     uintptr_t aobPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr + ptr.Read<int>(aobResult + 4) + 8));
 
     Log("Tunables pointer 0x%I64X", aobPtr);
 
-    memDump->Free();
+    memDump.Free();
 
     CloseHandle(pHandle);
 

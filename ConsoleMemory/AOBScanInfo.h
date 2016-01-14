@@ -9,16 +9,16 @@ struct PatternByte
     BOOL ignore;
 };
 
-struct PatternMask
-{
-    std::string pattern;
-    std::string mask;
-
-    operator std::string()
-    {
-        return pattern + " " + mask;
-    }
-};
+//struct PatternMask
+//{
+//    std::string pattern;
+//    std::string mask;
+//
+//    operator std::string()
+//    {
+//        return pattern + " " + mask;
+//    }
+//};
 
 struct AOBScanInfo
 {
@@ -27,15 +27,15 @@ struct AOBScanInfo
     AOBScanInfo(std::string pattern);
     AOBScanInfo(char* pattern);
 
-    AOBScanInfo(char* pattern, char* mask);
+    //AOBScanInfo(char* pattern, char* mask);
 
-    template <SIZE_T S> AOBScanInfo(char(pattern)[S], char(mask)[S]) : AOBScanInfo(PCHAR(pattern), PCHAR(mask))
-    {
+    //template <size_t S> AOBScanInfo(char(pattern)[S], char(mask)[S]) : AOBScanInfo(PCHAR(pattern), PCHAR(mask))
+    //{
 
-    }
+    //}
 
     std::string AOBScanInfo::tostring();
 
-    PatternMask tomask();
+    //PatternMask tomask();
 };
 

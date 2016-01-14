@@ -3,45 +3,14 @@
 #include <memoryapi.h>
 #include "MemBlock.h"
 
-MemBlock::MemBlock(HANDLE hProc, MEMORY_BASIC_INFORMATION memInfo) : hProc(hProc), size(memInfo.RegionSize), address(LPBYTE(memInfo.BaseAddress)), buffer(new BYTE[size])
+MemBlock::MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo) : rPtr(rPtr), size(memInfo.RegionSize), address(uintptr_t(memInfo.BaseAddress))
 {
-}
-
-MemBlock::~MemBlock()
-{
-    Free();
-}
-
-void MemBlock::Free()
-{
-    if (buffer)
-    {
-        delete[] buffer;
-        buffer = nullptr;
-    }
 }
 
 void MemBlock::Update()
 {
-    static BYTE buff[1024 * 1024]; // Static 1MB buffer
+    LogDebug("[MemDump][Scan] Copying 0x%I64X (0x%I64X bytes)", address, size);
 
-    SIZE_T totalRead = 0;
-    SIZE_T bytesToRead, bytesRead;
-
-    while (totalRead < size)
-    {
-        bytesToRead = min((size - totalRead), sizeof(buff));
-
-        if (!ReadProcessMemory(hProc, address + totalRead, buff, bytesToRead, &bytesRead))
-        {
-            break;
-        }
-
-        memcpy(buffer + totalRead, buff, bytesRead);
-
-        totalRead += bytesRead;
-    }
-
-    size = totalRead;
+    buffer = rPtr.ReadArray<byte>(address, size);
 }
 

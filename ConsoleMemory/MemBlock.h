@@ -1,18 +1,20 @@
 #pragma once
 
+#include "RemotePointer.h"
+
 class MemBlock
 {
 public:
-    HANDLE hProc;
-    SIZE_T size;
-    BYTE* address;
-    BYTE* buffer;
+    RPtr rPtr;
+    size_t size;
+    uintptr_t address;
+    std::vector<byte> buffer;
 
-    MemBlock(HANDLE hProc, MEMORY_BASIC_INFORMATION memInfo);
+    MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo);
 
-    ~MemBlock();
+    //~MemBlock();
 
-    void Free();
+    //void Free();
     void Update();
 };
 

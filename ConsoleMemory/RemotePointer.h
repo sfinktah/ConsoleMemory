@@ -2,6 +2,7 @@
 
 #include "initializer_list"
 #include <vector>
+#include <list>
 
 inline DWORD SetProtection(HANDLE handle, uintptr_t ptr, size_t size, DWORD newProtection = PAGE_EXECUTE_READWRITE)
 {
@@ -20,33 +21,52 @@ template <typename T> DWORD SetProtection(HANDLE handle, uintptr_t ptr, DWORD ne
 }
 
 template <typename T>
-T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
+T ReadRemoteMemory(HANDLE handle, uintptr_t ptr, size_t* read = nullptr)
 {
     T temp;
-    size_t read;
 
-    DWORD oldProtection = SetProtection<T>(handle, ptr);
+    //DWORD oldProtection = SetProtection<T>(handle, ptr);
 
-    BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), &read);
+    BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), read);
 
-    DWORD newProtection = SetProtection<T>(handle, ptr, oldProtection);
+    //DWORD newProtection = SetProtection<T>(handle, ptr, oldProtection);
 
-    BrickAssert(success && (read == sizeof(temp)), "Failed to Read Memory at 0x%I64X", ptr);
+    BrickAssert(success, "Failed to Read Memory at 0x%I64X", ptr);
     return temp;
 }
 
 template <typename T>
-void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T value)
+size_t ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, T* arr, size_t size)
 {
-    SIZE_T write;
+    T buffer[512 * 1024] = {  };
+    size_t totalRead = 0, successRead = 0;
+    while (totalRead < size)
+    {
+        size_t toRead = min(size - totalRead, sizeof(buffer)), read = 0;
 
-    DWORD oldProtection = SetProtection<T>(handle, ptr);
+        BOOL success = ReadProcessMemory(handle, LPVOID(ptr + totalRead), buffer, toRead, &read);
 
-    BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), &write);
+        BrickAssert(success, "Failed to Read Memory Array at 0x%I64X", ptr + totalRead);
 
-    DWORD newProtection = SetProtection<T>(handle, ptr, oldProtection);
+        memcpy(&arr[totalRead], buffer, read);
 
-    BrickAssert(success && (write == sizeof(value)), "Failed to Write Memory at 0x%I64X", ptr);
+        totalRead += toRead;
+        successRead += read;
+    }
+
+    return successRead;
+}
+
+template <typename T>
+void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T value, size_t* write = nullptr)
+{
+    //DWORD oldProtection = SetProtection<T>(handle, ptr);
+
+    BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), write);
+
+    //DWORD newProtection = SetProtection<T>(handle, ptr, oldProtection);
+
+    BrickAssert(success, "Failed to Write Memory at 0x%I64X", ptr);
 }
 
 struct RPtr
@@ -77,20 +97,22 @@ public:
         WriteRemoteMemory(handle, ptr, value);
     }
 
-    template <typename T, size_t S> std::array<T, S> ReadArray(uintptr_t ptr)
+    template <typename T> std::vector<T> ReadArray(uintptr_t ptr, size_t size)
     {
-        std::array<T, S> arr;
+        T* buffer = new T[size];
 
-        for (size_t i = 0; i < S; ++i)
-        {
-            arr[i] = Read<T>(ptr * (i * sizeof(T)));
-        }
-        return arr;
+        ReadRemoteMemoryArray(handle, ptr, buffer, size);
+
+        std::vector<T> vector (buffer, &buffer[size]);
+
+        delete[] buffer;
+
+        return vector;
     }
 
-    template <typename T, size_t S> void WriteArray(uintptr_t ptr, std::array<T, S> arr)
+    template <typename T> void WriteArray(uintptr_t ptr, std::vector<T> arr)
     {
-        for (size_t i = 0; i < S; ++i)
+        for (size_t i = 0; i < arr.size(); ++i)
         {
             Write(ptr * (i * sizeof(T)), arr[i]);
         }
