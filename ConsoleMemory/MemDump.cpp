@@ -29,9 +29,9 @@ void MemDump::Scan(DWORD protectionFlags)
             {
                 if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
-                    MemBlock* mB = new MemBlock(rPtr, memInfo);
+                    std::shared_ptr<MemBlock> mB = std::shared_ptr<MemBlock>(new MemBlock(rPtr, memInfo));
                     mB->Update();
-                    MemBlockList.push_back(std::shared_ptr<MemBlock>(mB));
+                    MemBlockList.push_back(mB);
                 }
 
                 uintptr_t tempaddr = uintptr_t(memInfo.BaseAddress) + memInfo.RegionSize;
@@ -51,11 +51,6 @@ void MemDump::Scan(DWORD protectionFlags)
     }
 }
 
-void MemDump::DeepScan()
-{
-    Scan(MEM_ALL_ACCESS);
-}
-
 void MemDump::Update()
 {
     for (std::shared_ptr<MemBlock> block : MemBlockList)
@@ -67,12 +62,13 @@ void MemDump::Update()
 void MemDump::Free()
 {
     Log("[MemDump][Free] Deleting %I64u blocks", MemBlockList.size());
-    MemBlockList.clear();
+
+    MemBlockList.clear(); // Shared Ptr auto calls MemBlock destructor.
 }
 
 void MemDump::Print()
 {
-    MemDumpInfo info = {  };
+    MemDumpInfo info = { };
 
     for (std::shared_ptr<MemBlock> block : MemBlockList)
     {
@@ -86,9 +82,9 @@ void MemDump::Print()
 
 uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
 {
-    size_t patternLength = pattern.patternArr.size();
+    size_t patternLength = pattern.patternArray.size();
 
-    Log("[MemDump][AOBScan] Scanning for %s", pattern.tostring().c_str());
+    Log("[MemDump][AOBScan] Scanning for %s", pattern.ToString().c_str());
 
     for (std::shared_ptr<MemBlock> block : MemBlockList)
     {
@@ -102,7 +98,7 @@ uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
 
                 for (size_t j = 0; j < patternLength; ++j)
                 {
-                    PatternByte pByte = pattern.patternArr[j];
+                    PatternByte pByte = pattern.patternArray[j];
                     if (!pByte.ignore && (block->dumpArray[i + j] != pByte.byte))
                     {
                         success = false;
@@ -130,11 +126,13 @@ MemDumpInfo MemDump::GetInfo()
 {
     size_t size = 0;
     size_t count = 0;
+
     for (std::shared_ptr<MemBlock> block : MemBlockList)
     {
         size += block->maxSize;
         count++;
     }
+
     return { size, count };
 }
 

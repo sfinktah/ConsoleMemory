@@ -1,4 +1,5 @@
 #pragma once
+
 #include <Windows.h>
 #include <vector>
 #include <memory>
@@ -6,7 +7,6 @@
 #include "MemBlock.h"
 #include "AOBScanInfo.h"
 #include "RemotePointer.h"
-
 
 #define MEM_ALL_ACCESS (\
 PAGE_READONLY          |\
@@ -23,15 +23,13 @@ struct MemDumpInfo
     size_t blockCount;
 };
 
+typedef std::vector<std::shared_ptr<MemBlock>> MemBlockVector;
+
 class MemDump
 {
 private:
     RPtr rPtr;
 public:
-
-    
-    typedef std::vector<std::shared_ptr<MemBlock>> MemBlockVector;
-
     MemBlockVector MemBlockList;
 
     typedef MemBlockVector::iterator        pMemBlockIter;
@@ -40,7 +38,6 @@ public:
     explicit MemDump(RPtr rPtr);
     ~MemDump();
     void Scan(DWORD protectionFlags = (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)); // Executable memory should be fine for most scans.
-    void DeepScan();
     void Update();
     void Free();
     void Print();
@@ -54,7 +51,7 @@ public:
     {
         return MemBlockList.end();
     }
-    
+
     uintptr_t AOBScan(AOBScanInfo pattern);
     RPtr GetRPtr();
     MemDumpInfo GetInfo();

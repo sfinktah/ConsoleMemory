@@ -20,8 +20,7 @@ namespace ProcessFinder
 
                 return processEntry;
             }
-        }
-        while (Process32Next(hProcSnapshot, &processEntry));
+        } while (Process32Next(hProcSnapshot, &processEntry));
 
         return { };
     }
@@ -41,8 +40,7 @@ namespace ProcessFinder
             {
                 return moduleEntry;
             }
-        }
-        while (Module32Next(hModSnapshot, &moduleEntry));
+        } while (Module32Next(hModSnapshot, &moduleEntry));
 
         return { };
     }

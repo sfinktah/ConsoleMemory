@@ -16,22 +16,22 @@ AOBScanInfo::AOBScanInfo(std::string pattern)
     {
         if (sByte == "?" || sByte == "??")
         {
-            patternArr.push_back({ NULL, TRUE });
+            patternArray.push_back({ NULL, TRUE });
         }
         else
         {
             int iByte = stoi(sByte, nullptr, 16);
             BrickAssert(iByte >= 0 && iByte <= 255, "Byte %i is not between 0 and 255", iByte);
-            patternArr.push_back({ BYTE(iByte), FALSE });
+            patternArray.push_back({ BYTE(iByte), FALSE });
         }
     }
 }
 
-std::string AOBScanInfo::tostring()
+std::string AOBScanInfo::ToString()
 {
     std::stringstream ss;
 
-    for each (PatternByte pattern in patternArr)
+    for each (PatternByte pattern in patternArray)
     {
         if (pattern.ignore)
         {

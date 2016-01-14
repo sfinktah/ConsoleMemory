@@ -6,6 +6,11 @@ MemBlock::MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo) : rPtr(rPtr), ma
 {
 }
 
+MemBlock::~MemBlock()
+{
+
+}
+
 RPtr MemBlock::GetRPtr()
 {
     return rPtr;
@@ -21,7 +26,7 @@ uintptr_t MemBlock::GetRemoteAddress()
     return remoteAddress;
 }
 
-std::vector<byte> MemBlock::GetDumpArray()
+std::vector<byte> MemBlock::GetByteDump()
 {
     return dumpArray;
 }

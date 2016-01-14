@@ -10,10 +10,10 @@ struct PatternByte
 
 struct AOBScanInfo
 {
-    std::vector<PatternByte> patternArr;
+    std::vector<PatternByte> patternArray;
 
     AOBScanInfo(std::string pattern);
 
-    std::string AOBScanInfo::tostring();
+    std::string AOBScanInfo::ToString();
 };
 

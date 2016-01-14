@@ -5,7 +5,7 @@
 #include "MemDump.h"
 #include "ProcessFinder.h"
 
-int main()
+void dostuff()
 {
     system("PAUSE");
 
@@ -33,15 +33,12 @@ int main()
 
     MemDump* memDump = new MemDump(ptr);
 
-    for (int i = 0; i < 50; i++)
-    {
-        memDump->Print();
-        memDump->Scan();
-    }
+    memDump->Print();
+    memDump->Scan();
 
-    //AOBScanInfo tunableScan = "48 8B 8C C2 ? ? ? ? 48 85 C9 74 19";
+    //AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
 
-    //uintptr_t aobResult = memDump.AOBScan(tunableScan);
+    //uintptr_t aobResult = memDump->AOBScan(tunableScan);
 
     //uintptr_t aobPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr + ptr.Read<int>(aobResult + 4) + 8));
 
@@ -50,6 +47,29 @@ int main()
     memDump->Free();
 
     CloseHandle(pHandle);
+}
+
+int main()
+{
+    RPtr ptr(GetCurrentProcess());
+
+    int arr[ ] { 10, 5, 2, 1337 };
+
+    ptr.WriteArray(uintptr_t(&arr), std::vector<int>({ 1, 2, 3 }));
+
+    for (int i = 0; i < 4; ++i)
+    {
+        printf_s("%i\n", arr[i]);
+    }
+
+    std::vector<int> arr2 = ptr.ReadArray<int>(uintptr_t(&arr), 4);
+
+    for (int i : arr2)
+    {
+        printf_s("arr2 %i\n", i);
+    }
+
+    dostuff();
 
     system("PAUSE");
 
