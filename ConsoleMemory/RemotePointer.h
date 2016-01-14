@@ -36,10 +36,11 @@ T ReadRemoteMemory(HANDLE handle, uintptr_t ptr, size_t* read = nullptr)
 }
 
 template <typename T>
-size_t ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, T* arr, size_t size)
+std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 {
     T buffer[512 * 1024] = {  };
-    size_t totalRead = 0, successRead = 0;
+    std::vector<T> vector = std::vector<T>(size);
+    size_t totalRead = 0;
     while (totalRead < size)
     {
         size_t toRead = min(size - totalRead, sizeof(buffer)), read = 0;
@@ -48,13 +49,14 @@ size_t ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, T* arr, size_t size)
 
         BrickAssert(success, "Failed to Read Memory Array at 0x%I64X", ptr + totalRead);
 
-        memcpy(&arr[totalRead], buffer, read);
+        std::copy_n(buffer, read, vector.begin() + totalRead);
 
         totalRead += toRead;
-        successRead += read;
     }
 
-    return successRead;
+    vector.shrink_to_fit();
+
+    return vector;
 }
 
 template <typename T>
@@ -99,15 +101,7 @@ public:
 
     template <typename T> std::vector<T> ReadArray(uintptr_t ptr, size_t size)
     {
-        T* buffer = new T[size];
-
-        ReadRemoteMemoryArray(handle, ptr, buffer, size);
-
-        std::vector<T> vector (buffer, &buffer[size]);
-
-        delete[] buffer;
-
-        return vector;
+        return ReadRemoteMemoryArray<T>(handle, ptr, size);
     }
 
     template <typename T> void WriteArray(uintptr_t ptr, std::vector<T> arr)
