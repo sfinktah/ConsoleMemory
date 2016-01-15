@@ -1,11 +1,10 @@
 #pragma once
 
+#include <string>
 #include <map>
 
-#include "IniValue.h"
-
-typedef std::map<std::string, IniValue> IniValueMap;
-typedef std::pair<std::string, IniValue> IniValuePair;
+typedef std::map<std::string, std::string> IniValueMap;
+typedef std::pair<std::string, std::string> IniValuePair;
 
 typedef IniValueMap::iterator IniValueIterator;
 
@@ -18,7 +17,7 @@ public:
     IniValueIterator begin();
     IniValueIterator end();
 
-    IniValue & operator[](std::string name);
+    std::string & operator[](std::string name);
 
 private:
     IniValueMap valueMap;

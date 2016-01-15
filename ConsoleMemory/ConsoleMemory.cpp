@@ -13,8 +13,7 @@ void testdump()
 {
     system("PAUSE");
 
-    IniConfig config = IniConfig::FromFile("myIni.ini");
-
+    IniConfig config = IniConfig::FromFile("tunables.ini");
 
     PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"gta5.exe");
     BrickAssert(processEntry.th32ProcessID != NULL, "Could not find Process");
@@ -44,14 +43,16 @@ void testdump()
         for (IniValuePair valuePair : config["float"])
         {
             int index = std::stoi(valuePair.first);
-            float value = valuePair.second.Get<float>();
+            float value = std::stof(valuePair.second);
+            Log("Writing tunable float %f to index %i", value, index);
             ptr.Write(aobPtr + (index * 8), value);
         }
 
         for (IniValuePair valuePair : config["int"])
         {
             int index = std::stoi(valuePair.first);
-            float value = valuePair.second.Get<int>();
+            int value = std::stoi(valuePair.second);
+            Log("Writing tunable int %i to index %i", value, index);
             ptr.Write(aobPtr + (index * 8), value);
         }
 
@@ -84,12 +85,39 @@ void testarrayaccess()
     }
 }
 
+void testini()
+{
+    IniConfig config = IniConfig::FromString("[int]\n1337 = 420\n\n[float]\n163 = 199999.0");
+
+    for (IniValuePair valuePair : config["float"])
+    {
+        int index = std::stoi(valuePair.first);
+        float value = std::stof(valuePair.second);
+        Log("float %f to index %i", value, index);
+    }
+
+    for (IniValuePair valuePair : config["int"])
+    {
+        int index = std::stoi(valuePair.first);
+        int value = std::stoi(valuePair.second);
+        Log("int %i to index %i", value, index);
+    }
+
+    config["int"]["42"] = std::to_string(1337);
+
+    Log("As String\n%s", config.ToString().c_str());
+
+    config.SaveToFile("tunables.ini");
+}
+
 int main()
 {
 
     //testarrayaccess();
 
-    testdump();
+    //testdump();
+
+    testini();
 
     system("PAUSE");
 
