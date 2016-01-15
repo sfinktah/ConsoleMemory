@@ -18,7 +18,7 @@ IniConfig::IniConfig(IniSectionMap sectionMap) : sectionMap(sectionMap)
 IniConfig IniConfig::FromString(std::string string)
 {
     const static std::regex headerRegex = std::regex("\\[([a-zA-Z0-9 ]+)\\]"); // [ string ]
-    const static std::regex valueRegex  = std::regex("([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9,.]+)"); // string1 = string2
+    const static std::regex valueRegex = std::regex("([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9,.]+)"); // string1 = string2
 
     IniConfig config;
 
@@ -27,14 +27,14 @@ IniConfig IniConfig::FromString(std::string string)
 
     std::string currentLine;
 
-    std::string currentHeader = "";
+    std::string currentHeader;
 
     while (getline(bufferStream, currentLine, '\n')) // Split string by '\n' (new line)
     {
         std::smatch match;
 
         if (regex_match(currentLine, match, headerRegex))
-        {            
+        {
             currentHeader = match.str(1);
         }
         else if (regex_match(currentLine, match, valueRegex))
@@ -42,7 +42,7 @@ IniConfig IniConfig::FromString(std::string string)
             std::string key = match.str(1);
             std::string value = match.str(2);
 
-            config[std::string(currentHeader)][std::string(key)] = std::string(value);
+            config[currentHeader][key] = value;
         }
     }
 
@@ -54,10 +54,12 @@ IniConfig IniConfig::FromString(std::string string)
 IniConfig IniConfig::FromFile(std::string file)
 {
     IniConfig config;
-    std::stringstream bufferStream;
 
     std::ifstream inputStream(file);
+    std::stringstream bufferStream;
+
     bufferStream << inputStream.rdbuf();
+
     inputStream.close();
 
     return FromString(bufferStream.str());
@@ -82,7 +84,7 @@ std::string IniConfig::ToString()
 {
     std::stringstream stringStream;
 
-    for (IniSectionPair sectionPair : sectionMap)
+    for (IniSectionPair sectionPair : *this)
     {
         std::string sectionName = sectionPair.first;
         IniSection sectionValues = sectionPair.second;

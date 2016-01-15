@@ -213,3 +213,4 @@ ModelManifest.xml
 
 #git
 *.opendb
+*.db
