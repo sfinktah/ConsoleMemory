@@ -11,8 +11,6 @@
 
 void testdump()
 {
-    system("PAUSE");
-
     IniConfig config = IniConfig::FromFile("tunables.ini");
 
     PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"gta5.exe");
@@ -38,13 +36,14 @@ void testdump()
     uintptr_t aobPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr + ptr.Read<int>(aobResult + 4) + 8));
 
     Log("Tunables pointer 0x%I64X", aobPtr);
+
     while (true)
     {
         for (IniValuePair valuePair : config["float"])
         {
             int index = std::stoi(valuePair.first);
             float value = std::stof(valuePair.second);
-            Log("Writing tunable float %f to index %i", value, index);
+            Log("Writing tunable %f at index %i", value, index);
             ptr.Write(aobPtr + (index * 8), value);
         }
 
@@ -52,7 +51,7 @@ void testdump()
         {
             int index = std::stoi(valuePair.first);
             int value = std::stoi(valuePair.second);
-            Log("Writing tunable int %i to index %i", value, index);
+            Log("Writing tunable %i at index %i", value, index);
             ptr.Write(aobPtr + (index * 8), value);
         }
 
@@ -115,9 +114,9 @@ int main()
 
     //testarrayaccess();
 
-    //testdump();
+    testdump();
 
-    testini();
+    //testini();
 
     system("PAUSE");
 

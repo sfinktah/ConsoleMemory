@@ -46,8 +46,6 @@ IniConfig IniConfig::FromString(std::string string)
         }
     }
 
-    system("PAUSE");
-
     return config;
 }
 
