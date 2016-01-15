@@ -3,7 +3,7 @@
 #include "initializer_list"
 #include <vector>
 
-#define BufferSize(T) ((512 / sizeof(T)) * 1024)
+#define buffer(T) T buffer [(512 / sizeof(T)) * 1024]
 
 template <typename T>
 T ReadRemoteMemory(HANDLE handle, uintptr_t ptr, size_t* read = nullptr)
@@ -20,7 +20,8 @@ T ReadRemoteMemory(HANDLE handle, uintptr_t ptr, size_t* read = nullptr)
 template <typename T>
 std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 {
-    T buffer[BufferSize(T)] = { };
+    buffer(T);
+
     std::vector<T> vector(size);
     size_t totalRead = 0;
 
@@ -54,7 +55,8 @@ void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T value, size_t* wrote = nu
 template <typename T>
 void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> vector)
 {
-    T buffer[BufferSize(T)] = { };
+    buffer(T);
+
     size_t arrSize = vector.size();
     size_t totalWrote = 0;
 

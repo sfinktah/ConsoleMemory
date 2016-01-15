@@ -33,6 +33,15 @@
     <ClInclude Include="RemotePointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IniConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IniSection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IniValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -51,6 +60,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ProcessFinder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IniConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IniSection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

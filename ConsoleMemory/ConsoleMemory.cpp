@@ -7,11 +7,16 @@
 
 #include <array>
 
+#include "IniConfig.h"
+
 void testdump()
 {
     system("PAUSE");
 
-    PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"chrome.exe");
+    IniConfig config = IniConfig::FromFile("myIni.ini");
+
+
+    PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"gta5.exe");
     BrickAssert(processEntry.th32ProcessID != NULL, "Could not find Process");
 
     MODULEENTRY32 processModule = ProcessFinder::GetMainModule(processEntry.th32ProcessID);
@@ -27,13 +32,31 @@ void testdump()
     memDump->Scan();
     memDump->Print();
 
-    //AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
+    AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
 
-    //uintptr_t aobResult = memDump->AOBScan(tunableScan);
+    uintptr_t aobResult = memDump->AOBScan(tunableScan);
 
-    //uintptr_t aobPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr + ptr.Read<int>(aobResult + 4) + 8));
+    uintptr_t aobPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr + ptr.Read<int>(aobResult + 4) + 8));
 
-    //Log("Tunables pointer 0x%I64X", aobPtr);
+    Log("Tunables pointer 0x%I64X", aobPtr);
+    while (true)
+    {
+        for (IniValuePair valuePair : config["float"])
+        {
+            int index = std::stoi(valuePair.first);
+            float value = valuePair.second.Get<float>();
+            ptr.Write(aobPtr + (index * 8), value);
+        }
+
+        for (IniValuePair valuePair : config["int"])
+        {
+            int index = std::stoi(valuePair.first);
+            float value = valuePair.second.Get<int>();
+            ptr.Write(aobPtr + (index * 8), value);
+        }
+
+        system("PAUSE");
+    }
 
     memDump->Free();
 
@@ -63,7 +86,8 @@ void testarrayaccess()
 
 int main()
 {
-    testarrayaccess();
+
+    //testarrayaccess();
 
     testdump();
 

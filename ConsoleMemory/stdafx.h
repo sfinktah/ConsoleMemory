@@ -20,6 +20,5 @@ void _BrickAssert(BOOL condition, PCHAR expression, PCHAR file, PCHAR functionNa
 
 #define FUNC_INFO __FILE__, __FUNCSIG__, __LINE__
 
-#define BrickAssert(condition, errormsg, ...) \
-_BrickAssert(condition, #condition, FUNC_INFO, errormsg, ##__VA_ARGS__)
+#define BrickAssert(condition, errormsg, ...) _BrickAssert(condition, #condition, FUNC_INFO, errormsg, ##__VA_ARGS__)
 

@@ -8,9 +8,11 @@ struct PatternByte
     bool ignore;
 };
 
+typedef std::vector<PatternByte> PatternByteVector;
+
 struct AOBScanInfo
 {
-    std::vector<PatternByte> patternArray;
+    PatternByteVector patternList;
 
     AOBScanInfo(std::string pattern);
 

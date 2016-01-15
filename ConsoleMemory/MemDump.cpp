@@ -31,7 +31,7 @@ void MemDump::Scan(DWORD protectionFlags)
                 {
                     MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, memInfo));
                     mB->Update();
-                    MemBlockList.push_back(mB);
+                    memBlockList.push_back(mB);
                 }
 
                 uintptr_t tempaddr = uintptr_t(memInfo.BaseAddress) + memInfo.RegionSize;
@@ -53,7 +53,7 @@ void MemDump::Scan(DWORD protectionFlags)
 
 void MemDump::Update()
 {
-    for (MemBlockPtr block : MemBlockList)
+    for (MemBlockPtr block : memBlockList)
     {
         block->Update();
     }
@@ -61,13 +61,13 @@ void MemDump::Update()
 
 void MemDump::Free()
 {
-    size_t size = MemBlockList.size();
+    size_t size = memBlockList.size();
 
     if (size > 0)
     {
         Log("[MemDump][Free] Deleting %I64u blocks", size);
 
-        MemBlockList.clear(); // Shared Ptr auto calls MemBlock destructor.
+        memBlockList.clear(); // Shared Ptr auto calls MemBlock destructor.
     }
 }
 
@@ -75,7 +75,7 @@ void MemDump::Print()
 {
     MemDumpInfo info = { };
 
-    for (MemBlockPtr block : MemBlockList)
+    for (MemBlockPtr block : memBlockList)
     {
         LogDebug("[MemDump][Print] Block 0x%I64X (0x%I64X)", block->remoteAddress, block->maxSize);
         info.totalBlockSize += block->maxSize;
@@ -87,11 +87,11 @@ void MemDump::Print()
 
 uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
 {
-    size_t patternLength = pattern.patternArray.size();
+    size_t patternLength = pattern.patternList.size();
 
     Log("[MemDump][AOBScan] Scanning for %s", pattern.ToString().c_str());
 
-    for (MemBlockPtr block : MemBlockList)
+    for (MemBlockPtr block : memBlockList)
     {
         if (block->maxSize > patternLength)
         {
@@ -103,7 +103,7 @@ uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
 
                 for (size_t j = 0; j < patternLength; ++j)
                 {
-                    PatternByte pByte = pattern.patternArray[j];
+                    PatternByte pByte = pattern.patternList[j];
                     if (!pByte.ignore && (block->dumpArray[i + j] != pByte.byte))
                     {
                         success = false;
@@ -119,6 +119,8 @@ uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
         }
     }
 
+    Log("[MemDump][AOBScan] Failed to find %s", pattern.ToString().c_str());
+
     return NULL;
 }
 
@@ -132,7 +134,7 @@ MemDumpInfo MemDump::GetInfo()
     size_t size = 0;
     size_t count = 0;
 
-    for (MemBlockPtr block : MemBlockList)
+    for (MemBlockPtr block : memBlockList)
     {
         size += block->maxSize;
         count++;

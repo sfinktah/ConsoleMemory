@@ -26,7 +26,7 @@ class MemDump
 private:
     RPtr rPtr;
 public:
-    MemBlockVector MemBlockList;
+    MemBlockVector memBlockList;
 
     typedef MemBlockVector::iterator        pMemBlockIter;
     typedef MemBlockVector::const_iterator  pConstMemBlockIter;
@@ -40,12 +40,12 @@ public:
 
     pMemBlockIter begin()
     {
-        return MemBlockList.begin();
+        return memBlockList.begin();
     }
 
     pMemBlockIter end()
     {
-        return MemBlockList.end();
+        return memBlockList.end();
     }
 
     uintptr_t AOBScan(AOBScanInfo pattern);

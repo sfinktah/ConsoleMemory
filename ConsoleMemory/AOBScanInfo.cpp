@@ -14,15 +14,17 @@ AOBScanInfo::AOBScanInfo(std::string pattern)
 
     while (ss >> sByte)
     {
-        if (sByte == "?" || sByte == "??")
+        if ((sByte == "?") || (sByte == "??"))
         {
-            patternArray.push_back({ NULL, TRUE });
+            patternList.push_back({ 0, true });
         }
         else
         {
             int iByte = stoi(sByte, nullptr, 16);
-            BrickAssert(iByte >= 0 && iByte <= 255, "Byte %i is not between 0 and 255", iByte);
-            patternArray.push_back({ BYTE(iByte), FALSE });
+
+            BrickAssert((iByte >= 0x00) && (iByte <= 0xFF), "Byte %X is not between 0 and 255", iByte);
+
+            patternList.push_back({ byte(iByte), false });
         }
     }
 }
@@ -31,16 +33,19 @@ std::string AOBScanInfo::ToString()
 {
     std::stringstream ss;
 
-    for (PatternByte pattern : patternArray)
+    for (PatternByte pattern : patternList)
     {
         if (pattern.ignore)
         {
-            ss << "? ";
+            ss << "?";
         }
         else
         {
-            ss << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << int(pattern.byte) << " ";
+            ss << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << int(pattern.byte);
         }
+
+        ss << " ";
     }
+
     return ss.str();
 }
