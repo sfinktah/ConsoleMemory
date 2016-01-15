@@ -2,6 +2,7 @@
 
 #include "initializer_list"
 #include <vector>
+#include <array>
 
 #define buffer(T) T buffer [(512 / sizeof(T)) * 1024]
 
