@@ -86,6 +86,7 @@ void testarrayaccess()
 
 void testini()
 {
+
     IniConfig config = IniConfig::FromString("[int]\n1337 = 420\n\n[float]\n163 = 199999.0");
 
     for (IniValuePair valuePair : config["float"])

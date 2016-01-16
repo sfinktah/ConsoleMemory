@@ -4,16 +4,21 @@
 #include <vector>
 #include <array>
 
-#define buffer(T) T buffer [(512 / sizeof(T)) * 1024]
+// Create a static 512KB buffer (per type)
+#define buffer(T)                                   \
+constexpr size_t bufferSize = (524288 / sizeof(T)); \
+static T buffer [bufferSize];                       \
 
 template <typename T>
-T ReadRemoteMemory(HANDLE handle, uintptr_t ptr, size_t* read = nullptr)
+T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
 {
     T temp;
 
-    BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), read);
+    size_t readAmt = 0;
 
-    BrickAssert(success, "Failed to Read Memory at 0x%I64X", ptr);
+    BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), &readAmt);
+
+    BrickAssert((success && (readAmt == sizeof(T))), "Failed to Read Memory at 0x%I64X", ptr);
 
     return temp;
 }
@@ -28,14 +33,17 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 
     while (totalRead < size)
     {
-        size_t toRead = min(size - totalRead, sizeof(buffer) / sizeof(T));
-        size_t read = 0;
+        size_t toRead = min(size - totalRead, bufferSize);
+        size_t toReadSize = toRead * sizeof(T);
+        size_t readSize = 0;
 
-        BOOL success = ReadProcessMemory(handle, LPVOID(ptr + totalRead), buffer, toRead * sizeof(T), &read);
+        BOOL success = ReadProcessMemory(handle, LPVOID(ptr + totalRead), buffer, toReadSize, &readSize);
 
-        BrickAssert(success, "Failed to Read Memory Array at 0x%I64X", ptr + totalRead);
+        size_t read = readSize / sizeof(T);
 
-        std::copy_n(buffer, read / sizeof(T), vector.begin() + totalRead);
+        BrickAssert((success && (readSize == toReadSize)), "Failed to Read Memory Array at 0x%I64X", ptr + totalRead);
+
+        std::copy_n(buffer, read, vector.begin() + totalRead);
 
         totalRead += toRead;
     }
@@ -46,11 +54,13 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 }
 
 template <typename T>
-void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T value, size_t* wrote = nullptr)
+void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T value)
 {
-    BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), wrote);
+    size_t wroteAmt = 0;
 
-    BrickAssert(success, "Failed to Write Memory at 0x%I64X", ptr);
+    BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), &wroteAmt);
+
+    BrickAssert((success && (wroteAmt == sizeof(T))), "Failed to Write Memory at 0x%I64X", ptr);
 }
 
 template <typename T>
@@ -63,13 +73,15 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> vector)
 
     while (totalWrote < arrSize)
     {
-        size_t toWrite = min(arrSize - totalWrote, sizeof(buffer) / sizeof(T));
+        size_t toWrite = min(arrSize - totalWrote, bufferSize);
+        size_t toWriteSize = toWrite * sizeof(T);
+        size_t writeSize = 0;
 
         std::copy_n(vector.begin() + totalWrote, toWrite, buffer);
 
-        BOOL success = WriteProcessMemory(handle, LPVOID(ptr + totalWrote), buffer, toWrite * sizeof(T), nullptr);
+        BOOL success = WriteProcessMemory(handle, LPVOID(ptr + totalWrote), buffer, toWriteSize, &writeSize);
 
-        BrickAssert(success, "Failed to Read Memory Array at 0x%I64X", ptr + totalWrote);
+        BrickAssert((success && (writeSize == toWriteSize)), "Failed to Read Memory Array at 0x%I64X", ptr + totalWrote);
 
         totalWrote += toWrite;
     }
@@ -77,8 +89,9 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> vector)
 
 struct RPtr
 {
-    HANDLE handle;
 public:
+    HANDLE handle;
+
     explicit RPtr(HANDLE handle) : handle(handle)
     {
     }

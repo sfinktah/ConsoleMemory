@@ -21,34 +21,37 @@ struct MemDumpInfo
     size_t blockCount;
 };
 
+typedef std::vector<MemBlockPtr>    MemBlockPtrVector;
+typedef MemBlockPtrVector::iterator MemBlocPtrIter;
+
 class MemDump
 {
 private:
     RPtr rPtr;
+
 public:
-    MemBlockVector memBlockList;
-
-    typedef MemBlockVector::iterator        pMemBlockIter;
-    typedef MemBlockVector::const_iterator  pConstMemBlockIter;
-
+    MemBlockPtrVector memBlockList;
+    
     explicit MemDump(RPtr rPtr);
     ~MemDump();
-    void Scan(DWORD protectionFlags = (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)); // Executable memory should be fine for most scans.
+    void Scan(DWORD protectionFlags = // Executable memory should be fine for most scans.
+        (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)); 
     void Update();
     void Free();
     void Print();
 
-    pMemBlockIter begin()
+    MemBlocPtrIter begin()
     {
         return memBlockList.begin();
     }
 
-    pMemBlockIter end()
+    MemBlocPtrIter end()
     {
         return memBlockList.end();
     }
 
     uintptr_t AOBScan(AOBScanInfo pattern);
+
     RPtr GetRPtr();
     MemDumpInfo GetInfo();
 };

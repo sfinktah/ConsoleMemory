@@ -3,7 +3,7 @@
 
 namespace ProcessFinder
 {
-    PROCESSENTRY32 GetProcessFromName(wchar_t* processName)
+    PROCESSENTRY32 GetProcessFromName(std::wstring processName)
     {
         HANDLE hProcSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
 
@@ -14,7 +14,7 @@ namespace ProcessFinder
 
         do
         {
-            if (_wcsicmp(processEntry.szExeFile, processName) == 0)
+            if (_wcsicmp(processName.data(), processEntry.szExeFile) == 0)
             {
                 CloseHandle(hProcSnapshot);
 
@@ -25,7 +25,7 @@ namespace ProcessFinder
         return { };
     }
 
-    MODULEENTRY32 GetProcessModule(DWORD pID, wchar_t* moduleName)
+    MODULEENTRY32 GetProcessModule(DWORD pID, std::wstring moduleName)
     {
         HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
 
@@ -36,7 +36,7 @@ namespace ProcessFinder
 
         do
         {
-            if (wcsstr(moduleEntry.szExePath, moduleName) != nullptr)
+            if (wcsstr(moduleEntry.szExePath, moduleName.data()) != nullptr)
             {
                 return moduleEntry;
             }

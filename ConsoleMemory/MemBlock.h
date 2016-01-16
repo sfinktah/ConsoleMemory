@@ -11,19 +11,19 @@ public:
     MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo);
     ~MemBlock();
     RPtr GetRPtr();
+    size_t GetSize();
     size_t GetMaxSize();
     uintptr_t GetRemoteAddress();
-    std::vector<byte> GetByteDump();
+    std::vector<byte> & GetByteDump();
 
     void Update();
 
-public:
+private:
     RPtr rPtr;
-    size_t maxSize;
-    uintptr_t remoteAddress;
+    const size_t maxSize; // Max Size of dump (not current size)
+    const uintptr_t remoteAddress;
     std::vector<byte> dumpArray;
 };
 
 typedef std::shared_ptr<MemBlock> MemBlockPtr;
-typedef std::vector<MemBlockPtr> MemBlockVector;
 
