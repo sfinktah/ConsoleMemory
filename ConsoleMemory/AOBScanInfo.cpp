@@ -5,7 +5,7 @@
 
 #include "AOBScanInfo.h"
 
-AOBScanInfo::AOBScanInfo(std::string pattern)
+AOBScanInfo::AOBScanInfo(std::string pattern, int alignment) : alignment(alignment)
 {
     std::stringstream ss;
     ss << pattern;
@@ -22,7 +22,7 @@ AOBScanInfo::AOBScanInfo(std::string pattern)
         {
             int iByte = stoi(sByte, nullptr, 16);
 
-            BrickAssert((iByte >= 0x00) && (iByte <= 0xFF), "Byte %X is not between 0 and 255", iByte);
+            assert((iByte >= 0x00) && (iByte <= 0xFF));
 
             patternList.push_back({ byte(iByte), false });
         }
@@ -48,4 +48,9 @@ std::string AOBScanInfo::ToString()
     }
 
     return ss.str();
+}
+
+AOBScanInfo::operator std::string()
+{
+    return ToString();
 }

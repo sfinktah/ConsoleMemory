@@ -6,19 +6,10 @@
 
 #include "IniConfig.h"
 
-IniConfig::IniConfig()
-{
-}
-
-IniConfig::IniConfig(IniSectionMap sectionMap) : sectionMap(sectionMap)
-{
-
-}
-
 IniConfig IniConfig::FromString(std::string string)
 {
-    const static std::regex headerRegex = std::regex("\\[([a-zA-Z0-9 ]+)\\]"); // [ string ]
-    const static std::regex valueRegex = std::regex("([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9,.]+)"); // string1 = string2
+    const static std::regex headerRegex = std::regex("\\[([a-zA-Z0-9 ]+)\\]"); // [ str(0) ]
+    const static std::regex valueRegex = std::regex("([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9,.]+)"); // str(0) = str(1)
 
     IniConfig config;
 
@@ -26,7 +17,6 @@ IniConfig IniConfig::FromString(std::string string)
     bufferStream << string;
 
     std::string currentLine;
-
     std::string currentHeader;
 
     while (getline(bufferStream, currentLine, '\n')) // Split string by '\n' (new line)
@@ -43,6 +33,10 @@ IniConfig IniConfig::FromString(std::string string)
             std::string value = match.str(2);
 
             config[currentHeader][key] = value;
+        }
+        else
+        {
+            Log("[IniConfig] Invalid Line %s", currentLine.c_str());
         }
     }
 
@@ -63,21 +57,6 @@ IniConfig IniConfig::FromFile(std::string file)
     return FromString(bufferStream.str());
 }
 
-IniSection & IniConfig::operator[](std::string name)
-{
-    return sectionMap[name];
-}
-
-IniSectionIterator IniConfig::begin()
-{
-    return sectionMap.begin();
-}
-
-IniSectionIterator IniConfig::end()
-{
-    return sectionMap.end();
-}
-
 std::string IniConfig::ToString()
 {
     std::stringstream stringStream;
@@ -85,7 +64,7 @@ std::string IniConfig::ToString()
     for (IniSectionPair sectionPair : *this)
     {
         std::string sectionName = sectionPair.first;
-        IniSection sectionValues = sectionPair.second;
+        IniValueMap sectionValues = sectionPair.second;
 
         stringStream << "[" << sectionName << "]" << std::endl;
 
@@ -104,9 +83,7 @@ void IniConfig::SaveToFile(std::string fileName)
 {
     std::ofstream fileStream(fileName);
 
-    std::string toString = ToString();
-
-    fileStream << toString;
+    fileStream << ToString();
 
     fileStream.close();
 }

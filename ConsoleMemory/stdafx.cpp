@@ -15,12 +15,16 @@ void _BrickAssert(BOOL condition, PCHAR expression, PCHAR file, PCHAR functionNa
 
         sprintf_s(buffer, errorMsg, list);
 
+#if defined _DEBUG
         Log("[Assertion Failed] %s '%s' | %s line %u at '%s'", buffer, expression, file, line, functionName);
+#else
+        Log("[Assertion Failed] %s", buffer);
+#endif
 
         va_end(list);
 
-#ifdef _DEBUG
-        abort();
-#endif
+//#if defined _DEBUG
+//        abort();
+//#endif
     }
 }

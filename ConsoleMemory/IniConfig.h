@@ -3,31 +3,20 @@
 #include <string>
 #include <map>
 
-#include "IniSection.h"
+typedef std::map<std::string, std::string> IniValueMap;
+typedef std::pair<std::string, std::string> IniValuePair;
 
-typedef std::map<std::string, IniSection> IniSectionMap;
-typedef std::pair<std::string, IniSection> IniSectionPair;
+typedef std::map<std::string, IniValueMap> IniSectionMap;
+typedef std::pair<std::string, IniValueMap> IniSectionPair;
 
-typedef IniSectionMap::iterator IniSectionIterator;
-
-class IniConfig
+class IniConfig : public IniSectionMap
 {
 public:
     static IniConfig FromString(std::string string);
     static IniConfig FromFile(std::string file);
 
-    IniConfig();
-    explicit IniConfig(IniSectionMap sectionMap);
-
-    IniSectionIterator begin();
-    IniSectionIterator end();
-
-    std::string ToString();
     void SaveToFile(std::string fileName);
-
-    IniSection & operator[] (std::string name);
-private:
-    IniSectionMap sectionMap;
+    std::string ToString();
 };
 
 

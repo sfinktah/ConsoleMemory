@@ -27,7 +27,7 @@ void MemDump::Scan(DWORD protectionFlags)
 
             if (bufferReturn > 0)
             {
-                if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
+                if ((memInfo.RegionSize > 0) && (memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
                     MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, memInfo));
                     mB->Update();
@@ -77,7 +77,7 @@ void MemDump::Print()
 
     for (MemBlockPtr block : memBlockList)
     {
-        LogDebug("[MemDump][Print] Block 0x%I64X (0x%I64X)", block->remoteAddress, block->maxSize);
+        LogDebug("[MemDump][Print] Block 0x%I64X (0x%I64X)", block->GetRemoteAddress(), block->GetSize());
         info.totalBlockSize += block->GetSize();
         info.blockCount++;
     }
@@ -92,16 +92,15 @@ uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
     Log("[MemDump][AOBScan] Scanning for %s", pattern.ToString().c_str());
 
     for (MemBlockPtr block : memBlockList)
-    {
-        
+    {        
         std::vector<byte> dumpVector = block->GetByteDump();
         size_t dumpSize = dumpVector.size();
 
         if (dumpSize > patternLength)
         {
-            LogDebug("[MemDump][AOBScan] Scanning Block. Address: 0x%I64X, Size: 0x%I64X", block->remoteAddress, block->maxSize);
+            LogDebug("[MemDump][AOBScan] Scanning Block. Address: 0x%I64X, Size: 0x%I64X", block->GetRemoteAddress(), block->GetSize());
 
-            for (uintptr_t i = 0; i < dumpSize - patternLength; ++i)
+            for (uintptr_t i = 0; i < dumpSize - patternLength; i += pattern.alignment)
             {
                 bool success = true;
 
@@ -126,6 +125,49 @@ uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
     Log("[MemDump][AOBScan] Failed to find %s", pattern.ToString().c_str());
 
     return NULL;
+}
+
+std::vector<uintptr_t> MemDump::AOBScanArray(AOBScanInfo pattern)
+{
+    std::vector<uintptr_t> results;
+
+    size_t patternLength = pattern.patternList.size();
+
+    Log("[MemDump][AOBScan] Scanning for %s", pattern.ToString().c_str());
+
+    for (MemBlockPtr block : memBlockList)
+    {
+
+        std::vector<byte> dumpVector = block->GetByteDump();
+        size_t dumpSize = dumpVector.size();
+
+        if (dumpSize > patternLength)
+        {
+            LogDebug("[MemDump][AOBScan] Scanning Block. Address: 0x%I64X, Size: 0x%I64X", block->GetRemoteAddress(), block->GetSize());
+
+            for (uintptr_t i = 0; i < dumpSize - patternLength; i += pattern.alignment)
+            {
+                bool success = true;
+
+                for (size_t j = 0; j < patternLength; ++j)
+                {
+                    PatternByte pByte = pattern.patternList[j];
+                    if (!pByte.ignore && (dumpVector[i + j] != pByte.byte))
+                    {
+                        success = false;
+                        break;
+                    }
+                }
+
+                if (success)
+                {
+                    results.push_back(block->GetRemoteAddress() + i);
+                }
+            }
+        }
+    }
+
+    return results;
 }
 
 RPtr MemDump::GetRPtr()

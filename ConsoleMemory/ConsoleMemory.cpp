@@ -14,28 +14,74 @@ void testdump()
     IniConfig config = IniConfig::FromFile("tunables.ini");
 
     PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"gta5.exe");
-    BrickAssert(processEntry.th32ProcessID != NULL, "Could not find Process");
+    assert(processEntry.th32ProcessID != NULL);
 
     MODULEENTRY32 processModule = ProcessFinder::GetMainModule(processEntry.th32ProcessID);
-    BrickAssert(processModule.dwSize != NULL, "Could not get main module");
+    assert(processModule.dwSize != NULL);
 
     HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
-    BrickAssert(pHandle != nullptr, "Could not get process handle");
+    assert(pHandle != nullptr);
 
     RPtr ptr(pHandle);
 
     MemDump* memDump = new MemDump(ptr);
 
-    memDump->Scan();
+    memDump->Scan(
+        //PAGE_READWRITE // Needed for water
+        //| PAGE_EXECUTE
+        //| PAGE_EXECUTE_READ
+        //| PAGE_EXECUTE_READWRITE
+            );
+
     memDump->Print();
 
-    AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
+    //AOBScanInfo waterScan1("1A 1A 1A 1A 00 00 00 00 00 00 00 00 00 00 00 00 04", 4); // The main ocean
+    //AOBScanInfo waterScan2("1A 1A 1A 1A 00 00 00 00 00 00 00 00 C9 56 20 43 04", 4); // Land Act reservoir
+    //AOBScanInfo waterScan3("1A 1A 1A 1A 00 00 00 00 00 00 00 00 00 00 F0 41 04", 4); // Alamo Sea
+    //AOBScanInfo waterScan4("1A 1A 1A 1A 00 00 00 00 00 00 00 00 B4 68 44 43 04", 4); // Lake vinewood    
 
-    uintptr_t aobResult = memDump->AOBScan(tunableScan);
+    //std::vector<uintptr_t> water1Result = memDump->AOBScanArray(waterScan1);
+    //std::vector<uintptr_t> water2Result = memDump->AOBScanArray(waterScan2);
+    //std::vector<uintptr_t> water3Result = memDump->AOBScanArray(waterScan3);
+    //std::vector<uintptr_t> water4Result = memDump->AOBScanArray(waterScan4);
 
-    uintptr_t aobPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr + ptr.Read<int>(aobResult + 4) + 8));
+    //memDump->Free();
 
-    Log("Tunables pointer 0x%I64X", aobPtr);
+    //Log("The main ocean     %I64u", water1Result.size());
+    //Log("Land Act reservoir %I64u", water2Result.size());
+    //Log("Alamo Sea          %I64u", water3Result.size());
+    //Log("Lake vinewood      %I64u", water4Result.size());
+
+    //for (uintptr_t waterPtr : water1Result)
+    //{
+    //    ptr.WriteArray<byte>(waterPtr + 12, { 0x29, 0x9C, 0x40, 0xC3, 0x04 });
+    //}
+
+    //for (uintptr_t waterPtr : water2Result)
+    //{
+    //    ptr.WriteArray<byte>(waterPtr + 12, { 0x00, 0x00, 0x00, 0x00, 0x04 });
+    //}
+
+    //for (uintptr_t waterPtr : water3Result)
+    //{
+    //    ptr.WriteArray<byte>(waterPtr + 12, { 0x00, 0x00, 0x70, 0xC1, 0x04 });
+    //}
+
+    //for (uintptr_t waterPtr : water4Result)
+    //{     
+    //    uintptr_t tunablesResult = memDump->AOBScan(tunableScan); 
+    //    ptr.WriteArray<byte>(waterPtr + 12, { 0x00, 0x00, 0xA0, 0xC0, 0x04 });
+    //}
+
+    AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19", 4);
+
+    uintptr_t tunablesResult = memDump->AOBScan(tunableScan);
+
+    uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 4) + 8);
+
+    Log("Tunables pointer 0x%I64X", tunablesPtr);
+
+    system("PAUSE");
 
     while (true)
     {
@@ -44,7 +90,7 @@ void testdump()
             int index = std::stoi(valuePair.first);
             float value = std::stof(valuePair.second);
             Log("Writing tunable %f at index %i", value, index);
-            ptr.Write(aobPtr + (index * 8), value);
+            ptr.Write(tunablesPtr + (index * 8), value);
         }
 
         for (IniValuePair valuePair : config["int"])
@@ -52,13 +98,11 @@ void testdump()
             int index = std::stoi(valuePair.first);
             int value = std::stoi(valuePair.second);
             Log("Writing tunable %i at index %i", value, index);
-            ptr.Write(aobPtr + (index * 8), value);
+            ptr.Write(tunablesPtr + (index * 8), value);
         }
 
         system("PAUSE");
     }
-
-    memDump->Free();
 
     CloseHandle(pHandle);
 }
@@ -86,7 +130,6 @@ void testarrayaccess()
 
 void testini()
 {
-
     IniConfig config = IniConfig::FromString("[int]\n1337 = 420\n\n[float]\n163 = 199999.0");
 
     for (IniValuePair valuePair : config["float"])
@@ -112,7 +155,6 @@ void testini()
 
 int main()
 {
-
     //testarrayaccess();
 
     testdump();

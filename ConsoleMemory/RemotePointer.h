@@ -4,7 +4,7 @@
 #include <vector>
 #include <array>
 
-// Create a static 512KB buffer (per type)
+// Create a 512KB buffer (per type)
 #define buffer(T)                                   \
 constexpr size_t bufferSize = (524288 / sizeof(T)); \
 static T buffer [bufferSize];                       \
@@ -18,9 +18,19 @@ T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
 
     BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), &readAmt);
 
-    BrickAssert((success && (readAmt == sizeof(T))), "Failed to Read Memory at 0x%I64X", ptr);
+    assert(success && (readAmt == sizeof(T)));
 
     return temp;
+}
+
+template <typename T>
+void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T value)
+{
+    size_t wroteAmt = 0;
+
+    BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), &wroteAmt);
+
+    assert(success && (wroteAmt == sizeof(T)));
 }
 
 template <typename T>
@@ -41,7 +51,7 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 
         size_t read = readSize / sizeof(T);
 
-        BrickAssert((success && (readSize == toReadSize)), "Failed to Read Memory Array at 0x%I64X", ptr + totalRead);
+        assert(success && (readSize == toReadSize));
 
         std::copy_n(buffer, read, vector.begin() + totalRead);
 
@@ -51,16 +61,6 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
     vector.shrink_to_fit();
 
     return vector;
-}
-
-template <typename T>
-void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T value)
-{
-    size_t wroteAmt = 0;
-
-    BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), &wroteAmt);
-
-    BrickAssert((success && (wroteAmt == sizeof(T))), "Failed to Write Memory at 0x%I64X", ptr);
 }
 
 template <typename T>
@@ -81,7 +81,7 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> vector)
 
         BOOL success = WriteProcessMemory(handle, LPVOID(ptr + totalWrote), buffer, toWriteSize, &writeSize);
 
-        BrickAssert((success && (writeSize == toWriteSize)), "Failed to Read Memory Array at 0x%I64X", ptr + totalWrote);
+        assert(success && (writeSize == toWriteSize));
 
         totalWrote += toWrite;
     }
@@ -113,7 +113,7 @@ public:
 
     template <typename T> void Write(uintptr_t ptr, T value)
     {
-        WriteRemoteMemory(handle, ptr, value);
+        WriteRemoteMemory<T>(handle, ptr, value);
     }
 
     template <typename T> std::vector<T> ReadArray(uintptr_t ptr, size_t size)
@@ -123,7 +123,7 @@ public:
 
     template <typename T> void WriteArray(uintptr_t ptr, std::vector<T> arr)
     {
-        WriteRemoteMemoryArray(handle, ptr, arr);
+        WriteRemoteMemoryArray<T>(handle, ptr, arr);
     }
 };
 

@@ -4,6 +4,7 @@
 
 MemBlock::MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo) : rPtr(rPtr), maxSize(memInfo.RegionSize), remoteAddress(uintptr_t(memInfo.BaseAddress))
 {
+
 }
 
 MemBlock::~MemBlock()
