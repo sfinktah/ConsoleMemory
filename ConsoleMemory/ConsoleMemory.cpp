@@ -17,7 +17,7 @@ void testdump()
     assert(processEntry.th32ProcessID != NULL);
 
     MODULEENTRY32 processModule = ProcessFinder::GetMainModule(processEntry.th32ProcessID);
-    assert(processModule.dwSize != NULL);
+    assert(processModule.th32ProcessID != NULL);
 
     HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
     assert(pHandle != nullptr);
@@ -27,10 +27,10 @@ void testdump()
     MemDump* memDump = new MemDump(ptr);
 
     memDump->Scan(
-        //PAGE_READWRITE // Needed for water
-        //| PAGE_EXECUTE
-        //| PAGE_EXECUTE_READ
-        //| PAGE_EXECUTE_READWRITE
+        //PAGE_READWRITE        |  // Needed for water
+        //PAGE_EXECUTE          |
+        //PAGE_EXECUTE_READ     |
+        //PAGE_EXECUTE_READWRITE
             );
 
     memDump->Print();
@@ -43,9 +43,7 @@ void testdump()
     //std::vector<uintptr_t> water1Result = memDump->AOBScanArray(waterScan1);
     //std::vector<uintptr_t> water2Result = memDump->AOBScanArray(waterScan2);
     //std::vector<uintptr_t> water3Result = memDump->AOBScanArray(waterScan3);
-    //std::vector<uintptr_t> water4Result = memDump->AOBScanArray(waterScan4);
-
-    //memDump->Free();
+    //std::vector<uintptr_t> water4Result = memDump->AOBScanArray(waterScan4);    
 
     //Log("The main ocean     %I64u", water1Result.size());
     //Log("Land Act reservoir %I64u", water2Result.size());
@@ -73,13 +71,25 @@ void testdump()
     //    ptr.WriteArray<byte>(waterPtr + 12, { 0x00, 0x00, 0xA0, 0xC0, 0x04 });
     //}
 
-    AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19", 4);
+    AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
 
     uintptr_t tunablesResult = memDump->AOBScan(tunableScan);
 
     uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 4) + 8);
 
+    MODULEENTRY32 modEntry = ProcessFinder::GetAddressInfo(processEntry.th32ProcessID, tunablesResult);
+
+    char path[MAX_PATH];
+    size_t converted;
+    wcstombs_s(&converted, path, modEntry.szModule, MAX_PATH);
+
+    Log("%I64u, %s", converted, path);
+
+    system("PAUSE");
+
     Log("Tunables pointer 0x%I64X", tunablesPtr);
+
+    memDump->Free();
 
     system("PAUSE");
 

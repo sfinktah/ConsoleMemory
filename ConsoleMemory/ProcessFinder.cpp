@@ -22,6 +22,8 @@ namespace ProcessFinder
             }
         } while (Process32Next(hProcSnapshot, &processEntry));
 
+        CloseHandle(hProcSnapshot);
+
         return { };
     }
 
@@ -36,28 +38,66 @@ namespace ProcessFinder
 
         do
         {
-            if (wcsstr(moduleEntry.szExePath, moduleName.data()) != nullptr)
+            if (_wcsicmp(moduleName.data(), moduleEntry.szModule) == 0)
             {
+                CloseHandle(hModSnapshot);
+
                 return moduleEntry;
             }
         } while (Module32Next(hModSnapshot, &moduleEntry));
+
+        CloseHandle(hModSnapshot);
 
         return { };
     }
 
     MODULEENTRY32 GetMainModule(DWORD pID)
     {
-        HANDLE hModuleSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
+        HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
 
         MODULEENTRY32 moduleEntry = { };
         moduleEntry.dwSize = sizeof(moduleEntry);
 
-        if (Module32First(hModuleSnapshot, &moduleEntry))
+        if (Module32First(hModSnapshot, &moduleEntry))
         {
+            CloseHandle(hModSnapshot);
+
             return moduleEntry;
         }
 
         Log("Could not get main module of process %u", pID);
+
+        CloseHandle(hModSnapshot);
+
+        return { };
+    }
+
+    MODULEENTRY32 GetAddressInfo(DWORD pID, uintptr_t address)
+    {
+        HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
+
+        MODULEENTRY32 moduleEntry = { };
+        moduleEntry.dwSize = sizeof(moduleEntry);
+
+        assert(Module32First(hModSnapshot, &moduleEntry));
+
+        do
+        {
+            uintptr_t moduleAddress = uintptr_t(moduleEntry.modBaseAddr);
+            LogDebug("[GetAddresInfo] Checking 0x%I64X", moduleAddress);
+
+            if ((moduleAddress < address) && ((moduleAddress + moduleEntry.modBaseSize) > address))
+            {
+                //CloseHandle(hModSnapshot);
+
+                return moduleEntry;
+            }
+
+        } while (Module32Next(hModSnapshot, &moduleEntry));
+
+        //CloseHandle(hModSnapshot);
+
+        Log("[GetAddresInfo] Could not get info of 0x%I64X", address);
 
         return { };
     }

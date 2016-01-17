@@ -51,7 +51,7 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 
         size_t read = readSize / sizeof(T);
 
-        assert(success && (readSize == toReadSize));
+        //assert(success && (readSize == toReadSize));
 
         std::copy_n(buffer, read, vector.begin() + totalRead);
 

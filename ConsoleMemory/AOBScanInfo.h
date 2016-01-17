@@ -15,7 +15,7 @@ struct AOBScanInfo
     int alignment;
     PatternByteVector patternList;
 
-    AOBScanInfo(std::string pattern, int alignment = 1);
+    AOBScanInfo(std::string pattern, int alignment = 4);
 
     std::string ToString();
 
