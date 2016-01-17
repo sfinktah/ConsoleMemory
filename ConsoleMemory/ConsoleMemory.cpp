@@ -77,13 +77,11 @@ void testdump()
 
     uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 4) + 8);
 
-    MODULEENTRY32 modEntry = ProcessFinder::GetAddressInfo(processEntry.th32ProcessID, tunablesResult);
+    MODULEENTRY32 modEntry = ProcessFinder::GetAddressInfo(ptr, tunablesResult);
 
     char path[MAX_PATH];
-    size_t converted;
-    wcstombs_s(&converted, path, modEntry.szModule, MAX_PATH);
-
-    Log("%I64u, %s", converted, path);
+    wcstombs_s(nullptr, path, modEntry.szModule, MAX_PATH);    
+    Log("%s", path);
 
     system("PAUSE");
 

@@ -72,32 +72,40 @@ namespace ProcessFinder
         return { };
     }
 
-    MODULEENTRY32 GetAddressInfo(DWORD pID, uintptr_t address)
+    MODULEENTRY32 GetAddressInfo(RPtr rPtr, uintptr_t address)
     {
-        HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
+        HANDLE pHandle = rPtr.handle;
 
-        MODULEENTRY32 moduleEntry = { };
-        moduleEntry.dwSize = sizeof(moduleEntry);
-
-        assert(Module32First(hModSnapshot, &moduleEntry));
-
-        do
+        if (pHandle)
         {
-            uintptr_t moduleAddress = uintptr_t(moduleEntry.modBaseAddr);
-            LogDebug("[GetAddresInfo] Checking 0x%I64X", moduleAddress);
+            DWORD pID = GetProcessId(pHandle);
 
-            if ((moduleAddress < address) && ((moduleAddress + moduleEntry.modBaseSize) > address))
+            HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
+
+            MODULEENTRY32 moduleEntry = { };
+            moduleEntry.dwSize = sizeof(moduleEntry);
+
+            assert(Module32First(hModSnapshot, &moduleEntry));
+
+            do
             {
-                //CloseHandle(hModSnapshot);
+                uintptr_t moduleAddress = uintptr_t(moduleEntry.modBaseAddr);
+                LogDebug("[GetAddresInfo] Checking 0x%I64X", moduleAddress);
 
-                return moduleEntry;
-            }
+                if ((moduleAddress < address) && ((moduleAddress + moduleEntry.modBaseSize) > address))
+                {
+                    //CloseHandle(hModSnapshot);
 
-        } while (Module32Next(hModSnapshot, &moduleEntry));
+                    return moduleEntry;
+                }
 
-        //CloseHandle(hModSnapshot);
+            } while (Module32Next(hModSnapshot, &moduleEntry));
 
-        Log("[GetAddresInfo] Could not get info of 0x%I64X", address);
+            //CloseHandle(hModSnapshot);
+
+            Log("[GetAddresInfo] Could not get info of 0x%I64X", address);
+        }
+
 
         return { };
     }

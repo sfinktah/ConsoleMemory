@@ -14,6 +14,6 @@ namespace ProcessFinder
 
     MODULEENTRY32 GetMainModule(DWORD processID);
 
-    MODULEENTRY32 GetAddressInfo(DWORD pID, uintptr_t address);
+    MODULEENTRY32 GetAddressInfo(RPtr rPtr, uintptr_t address);
 };
 
