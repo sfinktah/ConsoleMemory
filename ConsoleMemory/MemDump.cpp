@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "MemDump.h"
 
 MemDump::MemDump(RPtr rPtr) : rPtr(rPtr)

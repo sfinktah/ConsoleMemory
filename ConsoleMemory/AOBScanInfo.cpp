@@ -1,9 +1,9 @@
 #include "stdafx.h"
 
+#include "AOBScanInfo.h"
+
 #include <sstream>
 #include <iomanip>
-
-#include "AOBScanInfo.h"
 
 AOBScanInfo::AOBScanInfo(std::string pattern, int alignment) : alignment(alignment)
 {

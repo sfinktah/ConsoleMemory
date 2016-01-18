@@ -3,11 +3,8 @@
 #include "stdafx.h"
 
 #include "MemDump.h"
-#include "ProcessFinder.h"
-
-#include <array>
-
 #include "IniConfig.h"
+#include "ProcessFinder.h"
 
 void testdump()
 {
@@ -26,14 +23,14 @@ void testdump()
 
     MemDump* memDump = new MemDump(ptr);
 
-    memDump->Scan(
-        PAGE_READWRITE        |  // Needed for water
-        PAGE_EXECUTE          |
-        PAGE_EXECUTE_READ     |
-        PAGE_EXECUTE_READWRITE
-            );
+    //memDump->Scan(
+    //    PAGE_READWRITE        |  // Needed for water
+    //    PAGE_EXECUTE          |
+    //    PAGE_EXECUTE_READ     |
+    //    PAGE_EXECUTE_READWRITE
+    //        );
 
-    //memDump->ScanRange(uintptr_t(processModule.modBaseAddr), processModule.modBaseSize); // Only scan the main module
+    memDump->ScanRange(uintptr_t(processModule.modBaseAddr), processModule.modBaseSize); // Only scan the main module
 
     memDump->Print();
 
@@ -165,9 +162,9 @@ int main()
 {
     //testarrayaccess();
 
-    testdump();
+    //testdump();
 
-    //testini();
+    testini();
 
     system("PAUSE");
 

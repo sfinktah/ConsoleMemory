@@ -1,10 +1,10 @@
 #include "stdafx.h"
 
+#include "IniConfig.h"
+
 #include <regex>
 #include <sstream>
 #include <fstream>
-
-#include "IniConfig.h"
 
 IniConfig IniConfig::FromString(std::string string)
 {
@@ -53,6 +53,9 @@ IniConfig IniConfig::FromFile(std::string file)
     IniConfig config;
 
     std::ifstream inputStream(file);
+
+    assert(inputStream.is_open());
+
     std::stringstream bufferStream;
 
     bufferStream << inputStream.rdbuf();
@@ -87,6 +90,8 @@ std::string IniConfig::ToString()
 void IniConfig::SaveToFile(std::string fileName)
 {
     std::ofstream fileStream(fileName);
+
+    assert(fileStream.is_open());
 
     fileStream << ToString();
 

@@ -4,7 +4,6 @@
 
 #include <initializer_list>
 #include <vector>
-#include <array>
 
 #define buffer(T)                                   \
 constexpr size_t bufferSize = (8192 / sizeof(T));   \

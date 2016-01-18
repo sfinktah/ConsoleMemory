@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "ProcessFinder.h"
 
 namespace ProcessFinder
