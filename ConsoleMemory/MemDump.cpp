@@ -17,24 +17,28 @@ void MemDump::Scan(DWORD protectionFlags)
 
     uintptr_t addr = NULL;
 
-    if (rPtr.handle)
+    if (rPtr.pHandle)
     {
-        Log("[MemDump][Scan] Dumping Process ID %u", GetProcessId(rPtr.handle));
+        Log("[MemDump][Scan] Dumping Process ID %u", GetProcessId(rPtr.pHandle));
 
         while (true)
         {
             MEMORY_BASIC_INFORMATION memInfo = rPtr.QueryAddress(addr);
 
-            if (memInfo.RegionSize > 0)
+            uintptr_t address = uintptr_t(memInfo.BaseAddress);
+
+            size_t size = memInfo.RegionSize;
+
+            if (size > 0)
             {
-                if ((memInfo.RegionSize > 0) && (memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
+                if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
-                    MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, uintptr_t(memInfo.BaseAddress), memInfo.RegionSize));
+                    MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, address, size));
                     mB->Update();
                     memBlockList.push_back(mB);
                 }
 
-                uintptr_t tempaddr = uintptr_t(memInfo.BaseAddress) + memInfo.RegionSize;
+                uintptr_t tempaddr = address + size;
 
                 if (tempaddr == addr)
                 {
@@ -53,36 +57,34 @@ void MemDump::Scan(DWORD protectionFlags)
 
 void MemDump::ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protectionFlags)
 {
-    uintptr_t maxAddress = baseAddress + regionSize;
-
     Free();
+
+    uintptr_t maxAddress = baseAddress + regionSize;
 
     uintptr_t addr = baseAddress;
 
-    if (rPtr.handle)
+    if (rPtr.pHandle)
     {
-        Log("[MemDump][Scan] Dumping Process ID %u", GetProcessId(rPtr.handle));
+        Log("[MemDump][Scan] Dumping Process ID %u", GetProcessId(rPtr.pHandle));
 
         while (true)
         {
             MEMORY_BASIC_INFORMATION memInfo = rPtr.QueryAddress(addr);
 
-            if (memInfo.RegionSize > 0)
+            uintptr_t address = uintptr_t(memInfo.BaseAddress);
+
+            size_t size = memInfo.RegionSize;
+
+            if (size > 0)
             {
-                uintptr_t address = uintptr_t(memInfo.BaseAddress);
-
-                size_t size = memInfo.RegionSize;
-                
-                uintptr_t regionEnd = address + size;                
-
-                if ((size > 0) && (memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
+                if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
                     MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, address, size));
                     mB->Update();
                     memBlockList.push_back(mB);
                 }
 
-                uintptr_t tempaddr = regionEnd;
+                uintptr_t tempaddr = address + size;
 
                 if (tempaddr == addr)
                 {

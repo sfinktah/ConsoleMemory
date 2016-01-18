@@ -76,11 +76,11 @@ void testdump()
 
     uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 4) + 8);
 
-    MODULEENTRY32 modEntry = ProcessFinder::GetAddressInfo(ptr, tunablesResult);
+    //MODULEENTRY32 modEntry = ProcessFinder::GetAddressInfo(ptr, tunablesResult);
 
-    char path[MAX_PATH];
-    wcstombs_s(nullptr, path, modEntry.szModule, MAX_PATH);    
-    Log("%s", path);
+    //char path[MAX_PATH];
+    //wcstombs_s(nullptr, path, modEntry.szModule, MAX_PATH);    
+    //Log("%s", path);
 
     Log("Tunables pointer 0x%I64X", tunablesPtr);
 
@@ -161,10 +161,8 @@ void testini()
 int main()
 {
     //testarrayaccess();
-
-    //testdump();
-
-    testini();
+    testdump();
+    //testini();
 
     system("PAUSE");
 

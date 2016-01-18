@@ -51,7 +51,7 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 
         size_t read = readSize / sizeof(T);
 
-        //assert(success && (readSize == toReadSize));
+        assert(success && (readSize == toReadSize)); // May want to comment out, if you are planning to read huge chunks of memory in debug mode
 
         std::copy_n(buffer, read, vector.begin() + totalRead);
 
@@ -90,18 +90,31 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> vector)
 static MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t address)
 {
     MEMORY_BASIC_INFORMATION memInfo;
+
     size_t written = VirtualQueryEx(hProcess, LPVOID(address), &memInfo, sizeof(memInfo));
+
     assert(written == sizeof(memInfo));
+
     return memInfo;
 }
 
 struct RPtr
 {
 public:
-    HANDLE handle;
+    const HANDLE pHandle; // Better to make the handle const, to avoid confusion.
 
-    explicit RPtr(HANDLE handle) : handle(handle)
+    RPtr(HANDLE handle) : pHandle(handle)
     {
+
+    }
+
+    ~RPtr()
+    {
+        // Since we are getting parsed the handle instead of creating it, it's better not to close it.
+
+        //BOOL success = CloseHandle(pHandle);
+
+        //assert(success);        
     }
 
     uintptr_t Offset(uintptr_t ptr, std::initializer_list<uintptr_t> offsets)
@@ -114,29 +127,39 @@ public:
         return ptr;
     }
 
-    template <typename T> T Read(uintptr_t ptr)
+    template <typename T>
+    T Read(uintptr_t ptr)
     {
-        return ReadRemoteMemory<T>(handle, ptr);
+        return ReadRemoteMemory<T>(pHandle, ptr);
     }
 
-    template <typename T> void Write(uintptr_t ptr, T value)
+    template <typename T>
+    void Write(uintptr_t ptr, T value)
     {
-        WriteRemoteMemory<T>(handle, ptr, value);
+        WriteRemoteMemory<T>(pHandle, ptr, value);
     }
 
-    template <typename T> std::vector<T> ReadArray(uintptr_t ptr, size_t size)
+    template <typename T>
+    std::vector<T> ReadArray(uintptr_t ptr, size_t size)
     {
-        return ReadRemoteMemoryArray<T>(handle, ptr, size);
+        return ReadRemoteMemoryArray<T>(pHandle, ptr, size);
     }
 
-    template <typename T> void WriteArray(uintptr_t ptr, std::vector<T> arr)
+    template <typename T>
+    void WriteArray(uintptr_t ptr, std::vector<T> arr)
     {
-        WriteRemoteMemoryArray<T>(handle, ptr, arr);
+        WriteRemoteMemoryArray<T>(pHandle, ptr, arr);
     }
 
     MEMORY_BASIC_INFORMATION QueryAddress(uintptr_t ptr)
     {
-        return QueryRemoteAddress(handle, ptr);
+        return QueryRemoteAddress(pHandle, ptr);
+    }
+
+    operator HANDLE()
+    {
+        return pHandle;
     }
 };
+
 

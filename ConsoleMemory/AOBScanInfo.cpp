@@ -41,7 +41,7 @@ std::string AOBScanInfo::ToString()
         }
         else
         {
-            ss << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << int(pattern.byte);
+            ss << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << int(pattern.byte); // Cast to int so it is not treated as a regular char
         }
 
         ss << " ";
