@@ -10,6 +10,7 @@ IniConfig IniConfig::FromString(std::string string)
 {
     const static std::regex headerRegex = std::regex("\\[([a-zA-Z0-9 ]+)\\]"); // [ str(0) ]
     const static std::regex valueRegex = std::regex("([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9,.]+)"); // str(0) = str(1)
+    const static std::regex whitespaceRegex = std::regex("\\s*");
 
     IniConfig config;
 
@@ -33,6 +34,10 @@ IniConfig IniConfig::FromString(std::string string)
             std::string value = match.str(2);
 
             config[currentHeader][key] = value;
+        }
+        else if (regex_match(currentLine, match, whitespaceRegex))
+        {
+            // Ignore whitespace lines
         }
         else
         {

@@ -2,7 +2,7 @@
 
 #include "MemBlock.h"
 
-MemBlock::MemBlock(RPtr rPtr, MEMORY_BASIC_INFORMATION memInfo) : rPtr(rPtr), maxSize(memInfo.RegionSize), remoteAddress(uintptr_t(memInfo.BaseAddress))
+MemBlock::MemBlock(RPtr rPtr, uintptr_t remoteAddress, size_t maxSize) : rPtr(rPtr), remoteAddress(remoteAddress), maxSize(maxSize)
 {
 
 }

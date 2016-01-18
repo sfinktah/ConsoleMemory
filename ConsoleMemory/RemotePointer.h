@@ -1,13 +1,14 @@
 #pragma once
 
+#include <winnt.h>
+
 #include <initializer_list>
 #include <vector>
 #include <array>
 
-// Create a 512KB buffer (per type)
 #define buffer(T)                                   \
-constexpr size_t bufferSize = (524288 / sizeof(T)); \
-static T buffer [bufferSize];                       \
+constexpr size_t bufferSize = (8192 / sizeof(T));   \
+T buffer [bufferSize];                              \
 
 template <typename T>
 T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
@@ -87,6 +88,14 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> vector)
     }
 }
 
+static MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t address)
+{
+    MEMORY_BASIC_INFORMATION memInfo;
+    size_t written = VirtualQueryEx(hProcess, LPVOID(address), &memInfo, sizeof(memInfo));
+    assert(written == sizeof(memInfo));
+    return memInfo;
+}
+
 struct RPtr
 {
 public:
@@ -124,6 +133,11 @@ public:
     template <typename T> void WriteArray(uintptr_t ptr, std::vector<T> arr)
     {
         WriteRemoteMemoryArray<T>(handle, ptr, arr);
+    }
+
+    MEMORY_BASIC_INFORMATION QueryAddress(uintptr_t ptr)
+    {
+        return QueryRemoteAddress(handle, ptr);
     }
 };
 

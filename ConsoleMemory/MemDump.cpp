@@ -14,7 +14,6 @@ void MemDump::Scan(DWORD protectionFlags)
 {
     Free();
 
-    MEMORY_BASIC_INFORMATION memInfo;
     uintptr_t addr = NULL;
 
     if (rPtr.handle)
@@ -23,13 +22,13 @@ void MemDump::Scan(DWORD protectionFlags)
 
         while (true)
         {
-            size_t bufferReturn = VirtualQueryEx(rPtr.handle, LPVOID(addr), &memInfo, sizeof(memInfo));
+            MEMORY_BASIC_INFORMATION memInfo = rPtr.QueryAddress(addr);
 
-            if (bufferReturn > 0)
+            if (memInfo.RegionSize > 0)
             {
                 if ((memInfo.RegionSize > 0) && (memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
-                    MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, memInfo));
+                    MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, uintptr_t(memInfo.BaseAddress), memInfo.RegionSize));
                     mB->Update();
                     memBlockList.push_back(mB);
                 }
@@ -37,6 +36,59 @@ void MemDump::Scan(DWORD protectionFlags)
                 uintptr_t tempaddr = uintptr_t(memInfo.BaseAddress) + memInfo.RegionSize;
 
                 if (tempaddr == addr)
+                {
+                    break;
+                }
+
+                addr = tempaddr;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+}
+
+void MemDump::ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protectionFlags)
+{
+    uintptr_t maxAddress = baseAddress + regionSize;
+
+    Free();
+
+    uintptr_t addr = baseAddress;
+
+    if (rPtr.handle)
+    {
+        Log("[MemDump][Scan] Dumping Process ID %u", GetProcessId(rPtr.handle));
+
+        while (true)
+        {
+            MEMORY_BASIC_INFORMATION memInfo = rPtr.QueryAddress(addr);
+
+            if (memInfo.RegionSize > 0)
+            {
+                uintptr_t address = uintptr_t(memInfo.BaseAddress);
+
+                size_t size = memInfo.RegionSize;
+                
+                uintptr_t regionEnd = address + size;                
+
+                if ((size > 0) && (memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
+                {
+                    MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, address, size));
+                    mB->Update();
+                    memBlockList.push_back(mB);
+                }
+
+                uintptr_t tempaddr = regionEnd;
+
+                if (tempaddr == addr)
+                {
+                    break;
+                }
+
+                if (tempaddr > maxAddress)
                 {
                     break;
                 }

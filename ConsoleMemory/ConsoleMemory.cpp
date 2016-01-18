@@ -11,7 +11,6 @@
 
 void testdump()
 {
-
     IniConfig config = IniConfig::FromFile("tunables.ini");
 
     PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"gta5.exe");
@@ -28,18 +27,20 @@ void testdump()
     MemDump* memDump = new MemDump(ptr);
 
     memDump->Scan(
-        //PAGE_READWRITE        |  // Needed for water
-        //PAGE_EXECUTE          |
-        //PAGE_EXECUTE_READ     |
-        //PAGE_EXECUTE_READWRITE
+        PAGE_READWRITE        |  // Needed for water
+        PAGE_EXECUTE          |
+        PAGE_EXECUTE_READ     |
+        PAGE_EXECUTE_READWRITE
             );
+
+    //memDump->ScanRange(uintptr_t(processModule.modBaseAddr), processModule.modBaseSize); // Only scan the main module
 
     memDump->Print();
 
-    //AOBScanInfo waterScan1("1A 1A 1A 1A 00 00 00 00 00 00 00 00 00 00 00 00 04", 4); // The main ocean
-    //AOBScanInfo waterScan2("1A 1A 1A 1A 00 00 00 00 00 00 00 00 C9 56 20 43 04", 4); // Land Act reservoir
-    //AOBScanInfo waterScan3("1A 1A 1A 1A 00 00 00 00 00 00 00 00 00 00 F0 41 04", 4); // Alamo Sea
-    //AOBScanInfo waterScan4("1A 1A 1A 1A 00 00 00 00 00 00 00 00 B4 68 44 43 04", 4); // Lake vinewood    
+    //AOBScanInfo waterScan1("1A 1A 1A 1A 00 00 00 00 00 00 00 00 00 00 00 00 04"); // The main ocean
+    //AOBScanInfo waterScan2("1A 1A 1A 1A 00 00 00 00 00 00 00 00 C9 56 20 43 04"); // Land Act reservoir
+    //AOBScanInfo waterScan3("1A 1A 1A 1A 00 00 00 00 00 00 00 00 00 00 F0 41 04"); // Alamo Sea
+    //AOBScanInfo waterScan4("1A 1A 1A 1A 00 00 00 00 00 00 00 00 B4 68 44 43 04"); // Lake vinewood    
 
     //std::vector<uintptr_t> water1Result = memDump->AOBScanArray(waterScan1);
     //std::vector<uintptr_t> water2Result = memDump->AOBScanArray(waterScan2);
@@ -83,8 +84,6 @@ void testdump()
     char path[MAX_PATH];
     wcstombs_s(nullptr, path, modEntry.szModule, MAX_PATH);    
     Log("%s", path);
-
-    system("PAUSE");
 
     Log("Tunables pointer 0x%I64X", tunablesPtr);
 

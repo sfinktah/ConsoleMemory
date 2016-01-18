@@ -35,7 +35,9 @@ public:
     explicit MemDump(RPtr rPtr);
     ~MemDump();
     void Scan(DWORD protectionFlags = // Executable memory should be fine for most scans.
-        (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE)); 
+        (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE));
+    void ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protectionFlags =
+        (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE));
     void Update();
     void Free();
     void Print();
