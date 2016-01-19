@@ -155,7 +155,7 @@ uintptr_t MemDump::AOBScan(AOBScanInfo pattern)
         {
             LogDebug("[MemDump][AOBScan] Scanning Block. Address: 0x%I64X, Size: 0x%I64X", block->GetRemoteAddress(), block->GetSize());
 
-            for (uintptr_t i = 0; i < dumpSize - patternLength; i += pattern.alignment)
+            for (uintptr_t i = 0; i < dumpSize - patternLength; i += pattern.byteAlignment)
             {
                 bool success = true;
 
@@ -200,7 +200,7 @@ std::vector<uintptr_t> MemDump::AOBScanArray(AOBScanInfo pattern)
         {
             LogDebug("[MemDump][AOBScan] Scanning Block. Address: 0x%I64X, Size: 0x%I64X", block->GetRemoteAddress(), block->GetSize());
 
-            for (uintptr_t i = 0; i < dumpSize - patternLength; i += pattern.alignment)
+            for (uintptr_t i = 0; i < dumpSize - patternLength; i += pattern.byteAlignment)
             {
                 bool success = true;
 

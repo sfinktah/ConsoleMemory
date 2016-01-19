@@ -5,7 +5,12 @@
 #include <sstream>
 #include <iomanip>
 
-AOBScanInfo::AOBScanInfo(std::string pattern, int alignment) : alignment(alignment)
+AOBScanInfo::AOBScanInfo(std::string pattern) : AOBScanInfo(pattern, 1)
+{
+  
+}
+
+AOBScanInfo::AOBScanInfo(std::string pattern, int alignment) : byteAlignment(alignment)
 {
     std::stringstream ss;
     ss << pattern;

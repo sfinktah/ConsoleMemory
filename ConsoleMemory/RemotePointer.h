@@ -24,7 +24,7 @@ T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
 }
 
 template <typename T>
-void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T value)
+void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T & value)
 {
     size_t wroteAmt = 0;
 
@@ -64,7 +64,7 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 }
 
 template <typename T>
-void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> vector)
+void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> & vector)
 {
     buffer(T);
 

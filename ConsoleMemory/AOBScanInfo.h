@@ -12,10 +12,11 @@ typedef std::vector<PatternByte> PatternByteVector;
 
 struct AOBScanInfo
 {
-    int alignment;
+    int byteAlignment;
     PatternByteVector patternList;
 
-    AOBScanInfo(std::string pattern, int alignment = 4);
+    AOBScanInfo(std::string pattern);
+    AOBScanInfo(std::string pattern, int byteAlignment);
 
     std::string ToString();
 

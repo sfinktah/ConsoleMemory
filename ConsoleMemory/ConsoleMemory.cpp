@@ -53,17 +53,14 @@ void testdump()
     //{
     //    ptr.WriteArray<byte>(waterPtr + 12, { 0x29, 0x9C, 0x40, 0xC3, 0x04 });
     //}
-
     //for (uintptr_t waterPtr : water2Result)
     //{
     //    ptr.WriteArray<byte>(waterPtr + 12, { 0x00, 0x00, 0x00, 0x00, 0x04 });
     //}
-
     //for (uintptr_t waterPtr : water3Result)
     //{
     //    ptr.WriteArray<byte>(waterPtr + 12, { 0x00, 0x00, 0x70, 0xC1, 0x04 });
     //}
-
     //for (uintptr_t waterPtr : water4Result)
     //{     
     //    uintptr_t tunablesResult = memDump->AOBScan(tunableScan); 
@@ -76,7 +73,7 @@ void testdump()
 
     uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 4) + 8);
 
-    //MODULEENTRY32 modEntry = ProcessFinder::GetAddressInfo(ptr, tunablesResult);
+    MODULEENTRY32 modEntry = ProcessFinder::GetAddressInfo(GetProcessId(ptr), tunablesResult);
 
     //char path[MAX_PATH];
     //wcstombs_s(nullptr, path, modEntry.szModule, MAX_PATH);    
