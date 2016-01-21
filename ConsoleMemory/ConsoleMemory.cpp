@@ -109,25 +109,63 @@ void testdump()
     CloseHandle(pHandle);
 }
 
-void testarrayaccess()
+void testptr()
 {
+    Log("Testing ReadPtr and WritePtr");
+
+    const int initial = 42;
+    const int after = 1337;
+
     RPtr ptr(GetCurrentProcess());
 
-    int arr[ ] { 42, 360, 420, 1337 };
+    int i = initial;
 
-    for (int i : arr)
+    assert(i == ptr.ReadPtr(&i));
+
+    ptr.WritePtr(&i, after);
+
+    assert(i == after);
+
+    Log("ReadPtr and WritePtr test success");
+}
+
+void testarrayaccess()
+{
+    Log("Testing ReadArray and WriteArray");
+
+    const int arrSize = 5;
+
+    RPtr ptr(GetCurrentProcess());
+
+    int arr[arrSize];
+
+    for (int i = 0; i < arrSize; ++i)
     {
-        printf_s("%i\n", i);
+        arr[i] = i;
     }
 
-    ptr.WriteArray<int>(uintptr_t(&arr), { 1, 2, 3, 4 });
+    std::vector<int> read = ptr.ReadArray<int>(uintptr_t(&arr), arrSize);
 
-    std::vector<int> arr2 = ptr.ReadArray<int>(uintptr_t(&arr), 4);
-
-    for (int i : arr2)
+    for (int i = 0; i < arrSize; ++i)
     {
-        printf_s("%i\n", i);
+        assert(read[i] == i);
     }
+
+    std::vector<int> toWrite(arrSize);
+
+    for (int i = 0; i < arrSize; ++i)
+    {
+        toWrite[i] = (i * 10);
+    }
+
+    ptr.WriteArray(uintptr_t(&arr), toWrite);
+
+    for (int i = 0; i < arrSize; ++i)
+    {
+        assert(arr[i] == (i * 10));
+    }
+
+    Log("ReadArray and WriteArray test success");
 }
 
 void testini()
@@ -151,15 +189,14 @@ void testini()
     config["int"]["42"] = std::to_string(1337);
 
     Log("As String\n%s", config.ToString().c_str());
-
-    config.SaveToFile("tunables.ini");
 }
 
 int main()
 {
-    //testarrayaccess();
-    testdump();
+    //testdump();
     //testini();
+    testarrayaccess();
+    testptr();
 
     system("PAUSE");
 
