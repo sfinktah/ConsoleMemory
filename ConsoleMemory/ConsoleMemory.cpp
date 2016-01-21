@@ -191,11 +191,47 @@ void testini()
     Log("As String\n%s", config.ToString().c_str());
 }
 
+void testindexaccess()
+{
+    const size_t arrSize = 10;
+
+    RPtr ptr(GetCurrentProcess());
+
+    Log("Testing ReadIndex and WriteIndex");
+
+    int* arr = new int[arrSize];
+
+    for (size_t i = 0; i < arrSize; ++i)
+    {
+        arr[i] = int(i);
+    }
+
+    for (size_t i = 0; i < arrSize; ++i)
+    {
+        assert(ptr.ReadIndex(arr, i) == i);
+    }
+
+    for (size_t i = 0; i < arrSize; ++i)
+    {
+        ptr.WriteIndex(arr, i, int(arrSize - i));
+    }
+
+    for (size_t i = 0; i < arrSize; ++i)
+    {
+        assert(arr[i] == (arrSize - i));
+    }
+
+    delete[ ] arr;
+
+    Log("ReadIndex and WriteIndex test success");
+}
+
 int main()
 {
     //testdump();
     //testini();
     testarrayaccess();
+    testindexaccess();
     testptr();
 
     system("PAUSE");

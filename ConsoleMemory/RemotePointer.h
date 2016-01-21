@@ -152,6 +152,18 @@ public:
     }
 
     template <typename T>
+    T ReadIndex(T* ptr, size_t index)
+    {
+        return Read<T>(uintptr_t(ptr) + (sizeof(T) * index));
+    }
+
+    template <typename T>
+    void WriteIndex(T* ptr, size_t index, T value)
+    {
+        Write<T>(uintptr_t(ptr) + (sizeof(T) * index), value);
+    }
+
+    template <typename T>
     std::vector<T> ReadArray(uintptr_t ptr, size_t size)
     {
         return ReadRemoteMemoryArray<T>(pHandle, ptr, size);
