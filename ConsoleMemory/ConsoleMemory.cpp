@@ -10,10 +10,10 @@ void testdump()
 {
     IniConfig config = IniConfig::FromFile("tunables.ini");
 
-    PROCESSENTRY32 processEntry = ProcessFinder::GetProcessFromName(L"gta5.exe");
+    PROCESSENTRY32 processEntry = GetProcessFromName(L"gta5.exe");
     assert(processEntry.th32ProcessID != NULL);
 
-    MODULEENTRY32 processModule = ProcessFinder::GetMainModule(processEntry.th32ProcessID);
+    MODULEENTRY32 processModule = GetMainModule(processEntry.th32ProcessID);
     assert(processModule.th32ProcessID != NULL);
 
     HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
@@ -176,14 +176,14 @@ void testini()
     {
         int index = std::stoi(valuePair.first);
         float value = std::stof(valuePair.second);
-        Log("float %f to index %i", value, index);
+        Log("Float %f to index %i", value, index);
     }
 
     for (IniValuePair valuePair : config["int"])
     {
         int index = std::stoi(valuePair.first);
         int value = std::stoi(valuePair.second);
-        Log("int %i to index %i", value, index);
+        Log("Int %i to index %i", value, index);
     }
 
     config["int"]["42"] = std::to_string(1337);
@@ -193,7 +193,7 @@ void testini()
 
 void testindexaccess()
 {
-    const size_t arrSize = 10;
+    const int arrSize = 10;
 
     RPtr ptr(GetCurrentProcess());
 
@@ -201,24 +201,24 @@ void testindexaccess()
 
     int* arr = new int[arrSize];
 
-    for (size_t i = 0; i < arrSize; ++i)
+    for (int i = 0; i < arrSize; ++i)
     {
-        arr[i] = int(i);
+        arr[i] = i; // Do the intial set
     }
 
-    for (size_t i = 0; i < arrSize; ++i)
+    for (int i = 0; i < arrSize; ++i)
     {
-        assert(ptr.ReadIndex(arr, i) == i);
+        assert(ptr.ReadIndex(arr, i) == i); // Assert the ReadIndex is what it should be
     }
 
-    for (size_t i = 0; i < arrSize; ++i)
+    for (int i = 0; i < arrSize; ++i)
     {
-        ptr.WriteIndex(arr, i, int(arrSize - i));
+        ptr.WriteIndex(arr, i, arrSize - i); // Test WriteIndex
     }
 
-    for (size_t i = 0; i < arrSize; ++i)
+    for (int i = 0; i < arrSize; ++i)
     {
-        assert(arr[i] == (arrSize - i));
+        assert(arr[i] == (arrSize - i)); // Assert the value from WriteIndex is correct
     }
 
     delete[ ] arr;

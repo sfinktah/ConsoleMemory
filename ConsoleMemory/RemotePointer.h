@@ -1,10 +1,11 @@
 #pragma once
 
-#include <winnt.h>
+#include <Windows.h>
 
 #include <initializer_list>
 #include <vector>
 
+// 8KB buffer
 #define buffer(T)                                   \
 constexpr size_t bufferSize = (8192 / sizeof(T));   \
 T buffer [bufferSize];                              \
@@ -18,7 +19,7 @@ T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
 
     BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), &readAmt);
 
-    assert(success && (readAmt == sizeof(T)));
+    assert(success && (readAmt == sizeof(temp)));
 
     return temp;
 }
@@ -30,7 +31,7 @@ void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T & value)
 
     BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), &wroteAmt);
 
-    assert(success && (wroteAmt == sizeof(T)));
+    assert(success && (wroteAmt == sizeof(value)));
 }
 
 template <typename T>
@@ -43,17 +44,17 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 
     while (totalRead < size)
     {
-        size_t toRead = min(size - totalRead, bufferSize);
-        size_t toReadSize = toRead * sizeof(T);
-        size_t readSize = 0;
+        size_t toRead = min(size - totalRead, bufferSize); // Number of items to read
+        size_t toReadSize = toRead * sizeof(T); // Total size in bytes of items to read
+        size_t readSize = 0; // Bytes successfully read
 
         BOOL success = ReadProcessMemory(handle, LPVOID(ptr + totalRead), buffer, toReadSize, &readSize);
 
-        size_t read = readSize / sizeof(T);
+        size_t read = readSize / sizeof(T); // Number of items successfully read
 
         assert(success && (readSize == toReadSize)); // May want to comment out, if you are planning to read huge chunks of memory in debug mode
 
-        std::copy_n(buffer, read, vector.begin() + totalRead);
+        std::copy_n(buffer, read, vector.begin() + totalRead); // Copy from buffer to vector
 
         totalRead += toRead;
     }
@@ -73,11 +74,12 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> & vecto
 
     while (totalWrote < arrSize)
     {
-        size_t toWrite = min(arrSize - totalWrote, bufferSize);
-        size_t toWriteSize = toWrite * sizeof(T);
-        size_t writeSize = 0;
+        size_t toWrite = min(arrSize - totalWrote, bufferSize); // Number of items to write
+        size_t toWriteSize = toWrite * sizeof(T); // Total size in bytes of items to write
 
-        std::copy_n(vector.begin() + totalWrote, toWrite, buffer);
+        std::copy_n(vector.begin() + totalWrote, toWrite, buffer); // Copy from vector to buffer
+
+        size_t writeSize = 0; // Bytes successfully wrote
 
         BOOL success = WriteProcessMemory(handle, LPVOID(ptr + totalWrote), buffer, toWriteSize, &writeSize);
 
@@ -87,7 +89,7 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> & vecto
     }
 }
 
-static MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t address)
+static inline MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t address)
 {
     MEMORY_BASIC_INFORMATION memInfo;
 

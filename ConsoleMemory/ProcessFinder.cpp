@@ -12,116 +12,109 @@
     TH32CS_SNAPTHREAD 	| Includes all threads in the system in the snapshot. To enumerate the threads, see Thread32First.
 */
 
-namespace ProcessFinder
+PROCESSENTRY32 GetProcessFromName(std::wstring processName)
 {
-    PROCESSENTRY32 GetProcessFromName(std::wstring processName)
+    HANDLE hProcSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+
+    PROCESSENTRY32 processEntry = { };
+    processEntry.dwSize = sizeof(processEntry); // Have to set dwSize else Process32First fails
+
+    assert(Process32First(hProcSnapshot, &processEntry));
+
+    do
     {
-        HANDLE hProcSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-
-        PROCESSENTRY32 processEntry = { };
-        processEntry.dwSize = sizeof(processEntry);
-
-        assert(Process32First(hProcSnapshot, &processEntry));
-
-        do
+        if (_wcsicmp(processName.c_str(), processEntry.szExeFile) == 0) // If strings are equal (ignoring case)
         {
-            if (_wcsicmp(processName.data(), processEntry.szExeFile) == 0)
-            {
-                CloseHandle(hProcSnapshot);
+            CloseHandle(hProcSnapshot);
 
-                return processEntry;
-            }
-        } while (Process32Next(hProcSnapshot, &processEntry));
+            return processEntry;
+        }
+    } while (Process32Next(hProcSnapshot, &processEntry));
 
-        CloseHandle(hProcSnapshot);
+    CloseHandle(hProcSnapshot);
 
-        return { };
-    }
+    return { };
+}
 
-    MODULEENTRY32 GetProcessModule(DWORD pID, std::wstring moduleName)
+MODULEENTRY32 GetProcessModule(DWORD pID, std::wstring moduleName)
+{
+    HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
+
+    MODULEENTRY32 moduleEntry = { };
+    moduleEntry.dwSize = sizeof(moduleEntry); // Have to set dwSize else Module32First fails
+
+    assert(Module32First(hModSnapshot, &moduleEntry));
+
+    do
     {
-        HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
-
-        MODULEENTRY32 moduleEntry = { };
-        moduleEntry.dwSize = sizeof(moduleEntry);
-
-        assert(Module32First(hModSnapshot, &moduleEntry));
-
-        do
+        if (_wcsicmp(moduleName.c_str(), moduleEntry.szModule) == 0) // If strings are equal (ignoring case)
         {
-            if (_wcsicmp(moduleName.data(), moduleEntry.szModule) == 0)
-            {
-                CloseHandle(hModSnapshot);
+            CloseHandle(hModSnapshot);
 
-                return moduleEntry;
-            }
-        } while (Module32Next(hModSnapshot, &moduleEntry));
+            return moduleEntry;
+        }
+    } while (Module32Next(hModSnapshot, &moduleEntry));
 
+    CloseHandle(hModSnapshot);
+
+    return { };
+}
+
+MODULEENTRY32 GetMainModule(DWORD pID)
+{
+    HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
+
+    MODULEENTRY32 moduleEntry = { };
+    moduleEntry.dwSize = sizeof(moduleEntry); // Have to set dwSize else Module32First fails
+
+    if (Module32First(hModSnapshot, &moduleEntry)) // Module32First returns the main module of the process (if successfull)
+    {
         CloseHandle(hModSnapshot);
 
-        return { };
+        return moduleEntry;
     }
 
-    MODULEENTRY32 GetMainModule(DWORD pID)
+    CloseHandle(hModSnapshot);
+
+    return { };
+}
+
+MODULEENTRY32 GetAddressInfo(DWORD pID, uintptr_t address)
+{
+    HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
+
+    MODULEENTRY32 moduleEntry = { };
+    moduleEntry.dwSize = sizeof(moduleEntry); // Have to set dwSize else Module32First fails
+
+    assert(Module32First(hModSnapshot, &moduleEntry));
+
+    do
     {
-        HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
+        uintptr_t moduleBegin = uintptr_t(moduleEntry.modBaseAddr);
+        uintptr_t moduleEnd = moduleBegin + moduleEntry.modBaseSize;
 
-        MODULEENTRY32 moduleEntry = { };
-        moduleEntry.dwSize = sizeof(moduleEntry);
-
-        if (Module32First(hModSnapshot, &moduleEntry))
+        if ((address > moduleBegin) && (address < moduleEnd)) // If address is between start and end of module
         {
             CloseHandle(hModSnapshot);
 
             return moduleEntry;
         }
 
-        Log("Could not get main module of process %u", pID);
+    } while (Module32Next(hModSnapshot, &moduleEntry));
 
-        CloseHandle(hModSnapshot);
+    CloseHandle(hModSnapshot);
 
-        return { };
-    }
+    return { };
+}
 
-    MODULEENTRY32 GetAddressInfo(DWORD pID, uintptr_t address)
-    {
-        HANDLE hModSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID);
+MODULEINFO GetModuleInfo(HANDLE hProcess, HMODULE hModule)
+{
+    MODULEINFO moduleInfo;
 
-        MODULEENTRY32 moduleEntry = { };
-        moduleEntry.dwSize = sizeof(moduleEntry);
+    BOOL success = K32GetModuleInformation(hProcess, hModule, &moduleInfo, sizeof(moduleInfo));
 
-        assert(Module32First(hModSnapshot, &moduleEntry));
+    assert(success);
 
-        do
-        {
-            uintptr_t moduleAddress = uintptr_t(moduleEntry.modBaseAddr);
-            LogDebug("[GetAddresInfo] Checking 0x%I64X", moduleAddress);
-
-            if ((moduleAddress < address) && ((moduleAddress + moduleEntry.modBaseSize) > address))
-            {
-                CloseHandle(hModSnapshot);
-
-                return moduleEntry;
-            }
-
-        } while (Module32Next(hModSnapshot, &moduleEntry));
-
-        CloseHandle(hModSnapshot);
-
-        Log("[GetAddresInfo] Could not get info of 0x%I64X", address);
-
-        return { };
-    }
-
-    MODULEINFO GetModuleInfo(HANDLE hProcess, HMODULE hModule)
-    {
-        MODULEINFO moduleInfo;
-
-        BOOL success = K32GetModuleInformation(hProcess, hModule, &moduleInfo, sizeof(moduleInfo));
-
-        assert(success);
-
-        return moduleInfo;
-    }
+    return moduleInfo;
 }
 
