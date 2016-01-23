@@ -23,14 +23,9 @@ void testdump()
 
     MemDump* memDump = new MemDump(ptr);
 
-    //memDump->Scan(
-    //    PAGE_READWRITE        |  // Needed for water
-    //    PAGE_EXECUTE          |
-    //    PAGE_EXECUTE_READ     |
-    //    PAGE_EXECUTE_READWRITE
-    //        );
-
     memDump->ScanRange(uintptr_t(processModule.modBaseAddr), processModule.modBaseSize); // Only scan the main module
+
+    //memDump->Scan(PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE);
 
     memDump->Print();
 
@@ -73,7 +68,7 @@ void testdump()
 
     uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 4) + 8);
 
-    MODULEENTRY32 modEntry = ProcessFinder::GetAddressInfo(GetProcessId(ptr), tunablesResult);
+    //MODULEENTRY32 modEntry = GetAddressInfo(GetProcessId(ptr), tunablesResult);
 
     //char path[MAX_PATH];
     //wcstombs_s(nullptr, path, modEntry.szModule, MAX_PATH);    

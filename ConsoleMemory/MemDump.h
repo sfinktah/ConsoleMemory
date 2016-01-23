@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+#include <TlHelp32.h>
 
 #include "MemBlock.h"
 #include "AOBScanInfo.h"
@@ -21,36 +22,25 @@ struct MemDumpInfo
     size_t blockCount;
 };
 
-typedef std::vector<MemBlockPtr>    MemBlockPtrVector;
-typedef MemBlockPtrVector::iterator MemBlocPtrIter;
-
 class MemDump
 {
 private:
-    RPtr rPtr;
+    static const DWORD defaultProtFlags = (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE);
 
+    RPtr rPtr;
 public:
-    MemBlockPtrVector memBlockList;
+    std::vector<MemBlockPtr> memBlockList;
     
     explicit MemDump(RPtr rPtr);
     ~MemDump();
-    void Scan(DWORD protectionFlags = // Executable memory should be fine for most scans.
-        (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE));
-    void ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protectionFlags =
-        (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE));
+
+    void Scan(DWORD protectionFlags = defaultProtFlags);
+    void ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protectionFlags = defaultProtFlags);
+    void ScanModule(MODULEENTRY32 moduleInfo, DWORD protectionFlags = defaultProtFlags);
+
     void Update();
     void Free();
     void Print();
-
-    MemBlocPtrIter begin()
-    {
-        return memBlockList.begin();
-    }
-
-    MemBlocPtrIter end()
-    {
-        return memBlockList.end();
-    }
 
     uintptr_t AOBScan(AOBScanInfo pattern);
 
