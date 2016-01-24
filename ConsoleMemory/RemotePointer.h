@@ -10,6 +10,17 @@
 constexpr size_t bufferSize = (8192 / sizeof(T));   \
 T buffer [bufferSize];                              \
 
+static MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t address)
+{
+    MEMORY_BASIC_INFORMATION memInfo;
+
+    size_t written = VirtualQueryEx(hProcess, LPVOID(address), &memInfo, sizeof(memInfo));
+
+    assert(written == sizeof(memInfo));
+
+    return memInfo;
+}
+
 template <typename T>
 T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
 {
@@ -89,18 +100,7 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> & vecto
     }
 }
 
-static inline MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t address)
-{
-    MEMORY_BASIC_INFORMATION memInfo;
-
-    size_t written = VirtualQueryEx(hProcess, LPVOID(address), &memInfo, sizeof(memInfo));
-
-    assert(written == sizeof(memInfo));
-
-    return memInfo;
-}
-
-struct RPtr
+class RPtr
 {
 public:
     const HANDLE pHandle; // Better to make the handle const, to avoid confusion.
@@ -108,6 +108,11 @@ public:
     RPtr(HANDLE handle) : pHandle(handle)
     {
 
+    }
+
+    static RPtr LocalPtr()
+    {
+        return RPtr(GetCurrentProcess());
     }
 
     ~RPtr()
@@ -175,6 +180,20 @@ public:
     void WriteArray(uintptr_t ptr, std::vector<T> arr)
     {
         WriteRemoteMemoryArray<T>(pHandle, ptr, arr);
+    }
+
+    std::string ReadString(uintptr_t ptr, size_t maxSize)
+    {
+        std::vector<char> charVector = ReadArray<char>(ptr, maxSize + 1); // +1 for null char
+
+        charVector.back() = '\0'; // Make sure the array is null terminated
+
+        return std::string(charVector.data()); // Return a string (automatically sized to first null char)
+    }
+
+    void WriteString(uintptr_t ptr, std::string string)
+    {
+        WriteArray<char>(ptr, std::vector<char>(string.begin(), string.end()));
     }
 
     MEMORY_BASIC_INFORMATION QueryAddress(uintptr_t ptr)

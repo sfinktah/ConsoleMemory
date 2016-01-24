@@ -8,14 +8,13 @@
 
 IniConfig IniConfig::FromString(std::string string)
 {
-    const static std::regex headerRegex = std::regex("\\[([a-zA-Z0-9 ]+)\\]"); // [ str(0) ]
-    const static std::regex valueRegex = std::regex("([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9,.]+)"); // str(0) = str(1)
+    const static std::regex headerRegex     = std::regex("\\[([a-zA-Z0-9 ]+)\\]"); // [ str(0) ]
+    const static std::regex valueRegex      = std::regex("([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9,.]+)"); // str(0) = str(1)
     const static std::regex whitespaceRegex = std::regex("\\s*");
 
     IniConfig config;
 
-    std::stringstream bufferStream;
-    bufferStream << string;
+    std::stringstream bufferStream(string);
 
     std::string currentLine;
     std::string currentHeader;
@@ -24,18 +23,18 @@ IniConfig IniConfig::FromString(std::string string)
     {
         std::smatch match;
 
-        if (regex_match(currentLine, match, headerRegex))
+        if (regex_match(currentLine, match, headerRegex)) // If line is a section header
         {
             currentHeader = match.str(1);
         }
-        else if (regex_match(currentLine, match, valueRegex))
+        else if (regex_match(currentLine, match, valueRegex)) // If line is a value pair
         {
             std::string key = match.str(1);
             std::string value = match.str(2);
 
             config[currentHeader][key] = value;
         }
-        else if (regex_match(currentLine, match, whitespaceRegex))
+        else if (regex_match(currentLine, match, whitespaceRegex)) // If line is just whitespace
         {
             // Ignore whitespace lines
         }

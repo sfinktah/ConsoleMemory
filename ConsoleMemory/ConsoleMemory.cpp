@@ -57,8 +57,7 @@ void testdump()
     //    ptr.WriteArray<byte>(waterPtr + 12, { 0x00, 0x00, 0x70, 0xC1, 0x04 });
     //}
     //for (uintptr_t waterPtr : water4Result)
-    //{     
-    //    uintptr_t tunablesResult = memDump->AOBScan(tunableScan); 
+    //{
     //    ptr.WriteArray<byte>(waterPtr + 12, { 0x00, 0x00, 0xA0, 0xC0, 0x04 });
     //}
 
@@ -111,7 +110,7 @@ void testptr()
     const int initial = 42;
     const int after = 1337;
 
-    RPtr ptr(GetCurrentProcess());
+    RPtr ptr = RPtr::LocalPtr();
 
     int i = initial;
 
@@ -130,7 +129,7 @@ void testarrayaccess()
 
     const int arrSize = 5;
 
-    RPtr ptr(GetCurrentProcess());
+    RPtr ptr = RPtr::LocalPtr();
 
     int arr[arrSize];
 
@@ -188,11 +187,11 @@ void testini()
 
 void testindexaccess()
 {
+    Log("Testing ReadIndex and WriteIndex");
+
     const int arrSize = 10;
 
-    RPtr ptr(GetCurrentProcess());
-
-    Log("Testing ReadIndex and WriteIndex");
+    RPtr ptr = RPtr::LocalPtr();
 
     int* arr = new int[arrSize];
 
@@ -221,13 +220,36 @@ void testindexaccess()
     Log("ReadIndex and WriteIndex test success");
 }
 
+void teststringaccess()
+{
+    Log("Testing ReadString and WriteString");
+
+    RPtr ptr = RPtr::LocalPtr();
+
+    std::string beginString = "The quick brown fox jumps over the lazy dog";
+    std::string endString   = "Pack my box with five dozen liquor jugs";
+
+    std::string currString = beginString;
+
+    std::string readString = ptr.ReadString(uintptr_t(currString.data()), currString.length());
+
+    assert(currString == beginString);
+
+    ptr.WriteString(uintptr_t(beginString.data()), endString);
+
+    assert(currString == endString);
+
+    Log("ReadString and WriteString test sucesss")
+}
+
 int main()
 {
     //testdump();
-    //testini();
+    testini();
     testarrayaccess();
     testindexaccess();
     testptr();
+    teststringaccess();
 
     system("PAUSE");
 
