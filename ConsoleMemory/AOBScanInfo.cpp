@@ -27,7 +27,7 @@ AOBScanInfo::AOBScanInfo(std::string pattern, int alignment) : byteAlignment(ali
         {
             int iByte = stoi(sByte, nullptr, 16);
 
-            assert((iByte >= 0x00) && (iByte <= 0xFF));
+            BrickAssert((iByte >= 0x00) && (iByte <= 0xFF));
 
             patternList.push_back({ byte(iByte), false });
         }

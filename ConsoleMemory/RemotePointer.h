@@ -1,5 +1,7 @@
 #pragma once
 
+#include "BrickAssert.h"
+
 #include <Windows.h>
 
 #include <initializer_list>
@@ -16,7 +18,7 @@ static MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t ad
 
     size_t written = VirtualQueryEx(hProcess, LPVOID(address), &memInfo, sizeof(memInfo));
 
-    assert(written == sizeof(memInfo));
+    BrickAssert(written == sizeof(memInfo));
 
     return memInfo;
 }
@@ -30,7 +32,7 @@ T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
 
     BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), &readAmt);
 
-    assert(success && (readAmt == sizeof(temp)));
+    BrickAssert(success && (readAmt == sizeof(temp)));
 
     return temp;
 }
@@ -42,7 +44,7 @@ void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T & value)
 
     BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), &wroteAmt);
 
-    assert(success && (wroteAmt == sizeof(value)));
+    BrickAssert(success && (wroteAmt == sizeof(value)));
 }
 
 template <typename T>
@@ -63,7 +65,7 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 
         size_t read = readSize / sizeof(T); // Number of items successfully read
 
-        assert(success && (readSize == toReadSize)); // May want to comment out, if you are planning to read huge chunks of memory in debug mode
+        BrickAssert(success && (readSize == toReadSize)); // May want to comment out, if you are planning to read huge chunks of memory in debug mode
 
         std::copy_n(buffer, read, vector.begin() + totalRead); // Copy from buffer to vector
 
@@ -94,7 +96,7 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> & vecto
 
         BOOL success = WriteProcessMemory(handle, LPVOID(ptr + totalWrote), buffer, toWriteSize, &writeSize);
 
-        assert(success && (writeSize == toWriteSize));
+        BrickAssert(success && (writeSize == toWriteSize));
 
         totalWrote += toWrite;
     }
@@ -121,7 +123,7 @@ public:
 
         //BOOL success = CloseHandle(pHandle);
 
-        //assert(success);        
+        //BrickAssert(success);        
     }
 
     uintptr_t Offset(uintptr_t ptr, std::initializer_list<uintptr_t> offsets)
@@ -182,9 +184,9 @@ public:
         WriteRemoteMemoryArray<T>(pHandle, ptr, arr);
     }
 
-    std::string ReadString(uintptr_t ptr, size_t maxSize)
+    std::string ReadString(uintptr_t ptr, size_t maxLength)
     {
-        std::vector<char> charVector = ReadArray<char>(ptr, maxSize + 1); // +1 for null char
+        std::vector<char> charVector = ReadArray<char>(ptr, maxLength + 1); // +1 for null char
 
         charVector.back() = '\0'; // Make sure the array is null terminated
 

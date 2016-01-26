@@ -108,7 +108,7 @@ void MemDump::ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protecti
 
 void MemDump::ScanModule(MODULEENTRY32 moduleInfo, DWORD protectionFlags)
 {
-    assert(moduleInfo.th32ProcessID == GetProcessId(rPtr.pHandle)); // Make sure module is in current process
+    BrickAssert(moduleInfo.th32ProcessID == GetProcessId(rPtr.pHandle)); // Make sure module is in current process
 
     return ScanRange(uintptr_t(moduleInfo.modBaseAddr), moduleInfo.modBaseSize, protectionFlags);
 }

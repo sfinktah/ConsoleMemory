@@ -29,7 +29,7 @@ PROCESSENTRY32 GetProcessFromName(std::wstring processName)
     PROCESSENTRY32 processEntry = { };
     processEntry.dwSize = sizeof(processEntry); // Have to set dwSize else Process32First fails
 
-    assert(Process32First(hProcSnapshot, &processEntry));
+    BrickAssert(Process32First(hProcSnapshot, &processEntry));
 
     do
     {
@@ -37,11 +37,15 @@ PROCESSENTRY32 GetProcessFromName(std::wstring processName)
         {
             CloseHandle(hProcSnapshot);
 
+            Log("Found process %s. Process ID: %u", std::string(processName.begin(), processName.end()).c_str(), processEntry.th32ProcessID);
+
             return processEntry;
         }
     } while (Process32Next(hProcSnapshot, &processEntry));
 
     CloseHandle(hProcSnapshot);
+
+    Log("Failed to find process %s", std::string(processName.begin(), processName.end()).c_str());
 
     return { };
 }
@@ -53,7 +57,7 @@ MODULEENTRY32 GetProcessModule(DWORD pID, std::wstring moduleName)
     MODULEENTRY32 moduleEntry = { };
     moduleEntry.dwSize = sizeof(moduleEntry); // Have to set dwSize else Module32First fails
 
-    assert(Module32First(hModSnapshot, &moduleEntry));
+    BrickAssert(Module32First(hModSnapshot, &moduleEntry));
 
     do
     {
@@ -61,11 +65,15 @@ MODULEENTRY32 GetProcessModule(DWORD pID, std::wstring moduleName)
         {
             CloseHandle(hModSnapshot);
 
+            Log("Found module %s in process %u. Base Address: 0x%I64X, Size: 0x%X", std::string(moduleName.begin(), moduleName.end()).c_str(), pID, uintptr_t(moduleEntry.modBaseAddr), moduleEntry.modBaseSize);
+
             return moduleEntry;
         }
     } while (Module32Next(hModSnapshot, &moduleEntry));
 
     CloseHandle(hModSnapshot);
+
+    Log("Failed to find module %s in process %u", std::string(moduleName.begin(), moduleName.end()).c_str(), pID);
 
     return { };
 }
@@ -81,10 +89,14 @@ MODULEENTRY32 GetMainModule(DWORD pID)
     {
         CloseHandle(hModSnapshot);
 
+        Log("Found main module of process %u. Base Address: 0x%I64X, Size: 0x%X", pID, uintptr_t(moduleEntry.modBaseAddr), moduleEntry.modBaseSize);
+
         return moduleEntry;
     }
 
     CloseHandle(hModSnapshot);
+
+    Log("Failed to get main module of process %u", pID);
 
     return { };
 }
@@ -96,7 +108,7 @@ MODULEENTRY32 GetAddressInfo(DWORD pID, uintptr_t address)
     MODULEENTRY32 moduleEntry = { };
     moduleEntry.dwSize = sizeof(moduleEntry); // Have to set dwSize else Module32First fails
 
-    assert(Module32First(hModSnapshot, &moduleEntry));
+    BrickAssert(Module32First(hModSnapshot, &moduleEntry));
 
     do
     {
@@ -107,11 +119,15 @@ MODULEENTRY32 GetAddressInfo(DWORD pID, uintptr_t address)
         {
             CloseHandle(hModSnapshot);
 
+            Log("Found info for address at 0x%I64X in process 0x%X", address, pID);
+
             return moduleEntry;
         }
     } while (Module32Next(hModSnapshot, &moduleEntry));
 
     CloseHandle(hModSnapshot);
+
+    Log("Failed to find info for address at 0x%I64X in process 0x%X", address, pID);
 
     return { };
 }
@@ -122,7 +138,7 @@ MODULEINFO GetModuleInfo(HANDLE hProcess, HMODULE hModule)
 
     BOOL success = K32GetModuleInformation(hProcess, hModule, &moduleInfo, sizeof(moduleInfo));
 
-    assert(success);
+    BrickAssert(success);
 
     return moduleInfo;
 }

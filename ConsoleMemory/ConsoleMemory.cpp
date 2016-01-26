@@ -11,20 +11,22 @@ void testdump()
     IniConfig config = IniConfig::FromFile("tunables.ini");
 
     PROCESSENTRY32 processEntry = GetProcessFromName(L"gta5.exe");
-    assert(processEntry.th32ProcessID != NULL);
+    BrickAssert(processEntry.th32ProcessID != NULL);
 
     MODULEENTRY32 processModule = GetMainModule(processEntry.th32ProcessID);
-    assert(processModule.th32ProcessID != NULL);
+    BrickAssert(processModule.th32ProcessID != NULL);
 
     HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
-    assert(pHandle != nullptr);
+    BrickAssert(pHandle != nullptr);
 
     RPtr ptr(pHandle);
 
     MemDump* memDump = new MemDump(ptr);
 
-    memDump->ScanRange(uintptr_t(processModule.modBaseAddr), processModule.modBaseSize); // Only scan the main module
+    memDump->ScanModule(processModule);
 
+    //memDump->ScanRange(uintptr_t(processModule.modBaseAddr), processModule.modBaseSize); // Only scan the main module
+    
     //memDump->Scan(PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE);
 
     memDump->Print();
@@ -67,12 +69,6 @@ void testdump()
 
     uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 4) + 8);
 
-    //MODULEENTRY32 modEntry = GetAddressInfo(GetProcessId(ptr), tunablesResult);
-
-    //char path[MAX_PATH];
-    //wcstombs_s(nullptr, path, modEntry.szModule, MAX_PATH);    
-    //Log("%s", path);
-
     Log("Tunables pointer 0x%I64X", tunablesPtr);
 
     memDump->Free();
@@ -114,11 +110,11 @@ void testptr()
 
     int i = initial;
 
-    assert(i == ptr.ReadPtr(&i));
+    BrickAssert(i == ptr.ReadPtr(&i));
 
     ptr.WritePtr(&i, after);
 
-    assert(i == after);
+    BrickAssert(i == after);
 
     Log("ReadPtr and WritePtr test success");
 }
@@ -142,7 +138,7 @@ void testarrayaccess()
 
     for (int i = 0; i < arrSize; ++i)
     {
-        assert(read[i] == i);
+        BrickAssert(read[i] == i);
     }
 
     std::vector<int> toWrite(arrSize);
@@ -156,7 +152,7 @@ void testarrayaccess()
 
     for (int i = 0; i < arrSize; ++i)
     {
-        assert(arr[i] == (i * 10));
+        BrickAssert(arr[i] == (i * 10));
     }
 
     Log("ReadArray and WriteArray test success");
@@ -202,7 +198,7 @@ void testindexaccess()
 
     for (int i = 0; i < arrSize; ++i)
     {
-        assert(ptr.ReadIndex(arr, i) == i); // Assert the ReadIndex is what it should be
+        BrickAssert(ptr.ReadIndex(arr, i) == i); // BrickAssert the ReadIndex is what it should be
     }
 
     for (int i = 0; i < arrSize; ++i)
@@ -212,7 +208,7 @@ void testindexaccess()
 
     for (int i = 0; i < arrSize; ++i)
     {
-        assert(arr[i] == (arrSize - i)); // Assert the value from WriteIndex is correct
+        BrickAssert(arr[i] == (arrSize - i)); // BrickAssert the value from WriteIndex is correct
     }
 
     delete[ ] arr;
@@ -233,23 +229,23 @@ void teststringaccess()
 
     std::string readString = ptr.ReadString(uintptr_t(currString.data()), currString.length());
 
-    assert(currString == beginString);
+    BrickAssert(currString == beginString);
 
     ptr.WriteString(uintptr_t(beginString.data()), endString);
 
-    assert(currString == endString);
+    BrickAssert(currString == endString);
 
     Log("ReadString and WriteString test sucesss")
 }
 
 int main()
 {
-    //testdump();
-    testini();
-    testarrayaccess();
-    testindexaccess();
-    testptr();
-    teststringaccess();
+    testdump();
+    //testini();
+    //testarrayaccess();    
+    //testindexaccess();
+    //testptr();
+    //teststringaccess();
 
     system("PAUSE");
 

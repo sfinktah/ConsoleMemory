@@ -53,7 +53,7 @@ IniConfig IniConfig::FromFile(std::string file)
 
     std::ifstream inputStream(file);
 
-    assert(inputStream.is_open());
+    BrickAssert(inputStream.is_open());
 
     std::stringstream bufferStream;
 
@@ -90,7 +90,7 @@ void IniConfig::SaveToFile(std::string fileName)
 {
     std::ofstream fileStream(fileName);
 
-    assert(fileStream.is_open());
+    BrickAssert(fileStream.is_open());
 
     fileStream << ToString();
 
