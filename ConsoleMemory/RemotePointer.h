@@ -7,11 +7,6 @@
 #include <initializer_list>
 #include <vector>
 
-// 8KB buffer
-#define buffer(T)                                   \
-constexpr size_t bufferSize = (8192 / sizeof(T));   \
-T buffer [bufferSize];                              \
-
 static MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t address)
 {
     MEMORY_BASIC_INFORMATION memInfo;
@@ -48,31 +43,31 @@ void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T & value)
 }
 
 template <typename T>
-std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
+std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t count)
 {
-    buffer(T);
+    size_t itemSize     = sizeof(T);
+    size_t maxReadCount = 8192 / itemSize;
 
-    std::vector<T> vector(size);
+    std::vector<T> vector(count);
+
+    T* inputPtr  = reinterpret_cast<T*>(ptr);
+    T* outputPtr = vector.data();
+
     size_t totalRead = 0;
 
-    while (totalRead < size)
+    while (totalRead < count)
     {
-        size_t toRead = min(size - totalRead, bufferSize); // Number of items to read
-        size_t toReadSize = toRead * sizeof(T); // Total size in bytes of items to read
-        size_t readSize = 0; // Bytes successfully read
+        size_t itemsToRead = min(count - totalRead, maxReadCount);
+        size_t bytesToRead = itemsToRead * itemSize;
 
-        BOOL success = ReadProcessMemory(handle, LPVOID(ptr + totalRead), buffer, toReadSize, &readSize);
+        size_t bytesRead = 0;
 
-        size_t read = readSize / sizeof(T); // Number of items successfully read
+        BOOL success = ReadProcessMemory(handle, inputPtr + totalRead, outputPtr + totalRead, bytesToRead, &bytesRead);
 
-        BrickAssert(success && (readSize == toReadSize)); // May want to comment out, if you are planning to read huge chunks of memory in debug mode
+        BrickAssert(success && (bytesRead == bytesToRead));
 
-        std::copy_n(buffer, read, vector.begin() + totalRead); // Copy from buffer to vector
-
-        totalRead += toRead;
+        totalRead += itemsToRead;
     }
-
-    vector.shrink_to_fit();
 
     return vector;
 }
@@ -80,25 +75,28 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t size)
 template <typename T>
 void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> & vector)
 {
-    buffer(T);
+    size_t itemSize = sizeof(T);
+    size_t maxWriteCount = 8192 / itemSize;
 
-    size_t arrSize = vector.size();
+    size_t count = vector.size();
+
+    T* inputPtr  = vector.data();
+    T* outputPtr = reinterpret_cast<T*>(ptr);
+
     size_t totalWrote = 0;
 
-    while (totalWrote < arrSize)
+    while (totalWrote < count)
     {
-        size_t toWrite = min(arrSize - totalWrote, bufferSize); // Number of items to write
-        size_t toWriteSize = toWrite * sizeof(T); // Total size in bytes of items to write
+        size_t itemsToWrite = min(count - totalWrote, maxWriteCount);
+        size_t bytesToWrite = itemsToWrite * itemSize;
 
-        std::copy_n(vector.begin() + totalWrote, toWrite, buffer); // Copy from vector to buffer
+        size_t bytesWrote = 0;
 
-        size_t writeSize = 0; // Bytes successfully wrote
+        BOOL success = WriteProcessMemory(handle, outputPtr + totalWrote, inputPtr + totalWrote, bytesToWrite, &bytesWrote);
 
-        BOOL success = WriteProcessMemory(handle, LPVOID(ptr + totalWrote), buffer, toWriteSize, &writeSize);
+        BrickAssert(success && (bytesWrote == bytesToWrite));
 
-        BrickAssert(success && (writeSize == toWriteSize));
-
-        totalWrote += toWrite;
+        totalWrote += itemsToWrite;
     }
 }
 
@@ -195,7 +193,10 @@ public:
 
     void WriteString(uintptr_t ptr, std::string string)
     {
-        WriteArray<char>(ptr, std::vector<char>(string.begin(), string.end()));
+        std::vector<char> toWrite(string.begin(), string.end());
+        toWrite.push_back('\0');
+
+        WriteArray<char>(ptr, toWrite);
     }
 
     MEMORY_BASIC_INFORMATION QueryAddress(uintptr_t ptr)

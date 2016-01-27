@@ -142,7 +142,7 @@ void testarrayaccess()
 {
     Log("Testing ReadArray and WriteArray");
 
-    const int arrSize = 5;
+    const int arrSize = 10000;
 
     RPtr ptr = RPtr::LocalPtr();
 
@@ -250,7 +250,9 @@ void teststringaccess()
 
     BrickAssert(currString == beginString);
 
-    ptr.WriteString(uintptr_t(beginString.data()), endString);
+    ptr.WriteString(uintptr_t(currString.data()), endString);
+
+    currString = std::string(currString.data()); // Rescan string, because std::string stores the length.
 
     BrickAssert(currString == endString);
 
@@ -259,26 +261,19 @@ void teststringaccess()
 
 void testother()
 {
-    std::vector<int> vec(10);
-
-    Log("Constructor");
-
-    for (auto i = vec.begin(), end = vec.end(); i < end; ++i)
-    {
-        Log("%i", *i);
-    }
+    // Empty for now
 }
 
 int main()
 {
     //testdump();
-    //testini();
-    //testarrayaccess();    
-    //testindexaccess();
-    //testptr();
-    //teststringaccess();
+    testini();
+    testarrayaccess();    
+    testindexaccess();
+    testptr();
+    teststringaccess();
 
-    testother();
+    //testother();
 
     system("PAUSE");
 
