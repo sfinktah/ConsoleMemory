@@ -63,13 +63,25 @@ void testdump()
     //    ptr.WriteArray<byte>(waterPtr + 12, { 0x00, 0x00, 0xA0, 0xC0, 0x04 });
     //}
 
-    AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
+    AOBScanInfo tunableScan     ("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
+    AOBScanInfo worldScan       ("48 8B 05 ? ? ? ? 45 ? ? ? ? 48 8B 48 08 48 85 C9 74 07");
 
-    uintptr_t tunablesResult = memDump->AOBScan(tunableScan);
+    uintptr_t tunablesResult    = memDump->AOBScan(tunableScan);
+    uintptr_t worldResult       = memDump->AOBScan(worldScan);
 
-    uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 4) + 8);
+    uintptr_t tunablesPtr       = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 0x4) + 0x8);
+    uintptr_t worldPtr          = worldResult + ptr.Read<int>(worldResult + 0x3) + 0x7;
+
+    uintptr_t playerPtr         = ptr.Offset(worldPtr,      { 0x8 });
+    uintptr_t playerInfoPtr     = ptr.Offset(playerPtr,     { 0x1088 });
+
+    uintptr_t healthPtr         = ptr.Offset(playerPtr,     { 0x280 });
+    uintptr_t maxHealthPtr      = ptr.Offset(playerPtr,     { 0x284 });
+
+    uintptr_t namePtr           = ptr.Offset(playerInfoPtr, { 0x7C });
 
     Log("Tunables pointer 0x%I64X", tunablesPtr);
+    Log("World Ptr 0x%I64X", worldPtr);
 
     memDump->Free();
 
@@ -77,6 +89,13 @@ void testdump()
 
     while (true)
     {
+        std::string playerName = ptr.ReadString(namePtr, 32);
+
+        ptr.Write<float>(healthPtr, 9999.0f);
+        ptr.Write<float>(maxHealthPtr, 9999.0f);
+
+        Log("Player Name: %s", playerName.c_str());
+
         for (IniValuePair valuePair : config["float"])
         {
             int index = std::stoi(valuePair.first);
@@ -238,14 +257,28 @@ void teststringaccess()
     Log("ReadString and WriteString test sucesss")
 }
 
+void testother()
+{
+    std::vector<int> vec(10);
+
+    Log("Constructor");
+
+    for (auto i = vec.begin(), end = vec.end(); i < end; ++i)
+    {
+        Log("%i", *i);
+    }
+}
+
 int main()
 {
-    testdump();
+    //testdump();
     //testini();
     //testarrayaccess();    
     //testindexaccess();
     //testptr();
     //teststringaccess();
+
+    testother();
 
     system("PAUSE");
 
