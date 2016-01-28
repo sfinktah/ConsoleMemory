@@ -21,7 +21,7 @@ void TestPointerAccess()
     const int initial = 42;
     const int after = 1337;
 
-    RPtr ptr = RPtr::LocalPtr();
+    RMem ptr = RMem::LocalPtr();
 
     int i = initial;
 
@@ -40,7 +40,7 @@ void TestArrayAccess()
 
     const int arrSize = 10000;
 
-    RPtr ptr = RPtr::LocalPtr();
+    RMem ptr = RMem::LocalPtr();
 
     int arr[arrSize];
 
@@ -102,7 +102,7 @@ void TestIndexAccess()
 
     const int arrSize = 10;
 
-    RPtr ptr = RPtr::LocalPtr();
+    RMem ptr = RMem::LocalPtr();
 
     int* arr = new int[arrSize];
 
@@ -136,7 +136,7 @@ void TestStringAccess()
 {
     Log("Testing ReadString and WriteString");
 
-    RPtr ptr = RPtr::LocalPtr();
+    RMem ptr = RMem::LocalPtr();
 
     std::string beginString = "The quick brown fox jumps over the lazy dog";
     std::string endString = "Pack my box with five dozen liquor jugs";

@@ -8,9 +8,9 @@
 class MemBlock
 {
 public:
-    MemBlock(RPtr rPtr, uintptr_t remoteAddress, size_t maxSize);
+    MemBlock(RMem rPtr, uintptr_t remoteAddress, size_t maxSize);
     ~MemBlock();
-    RPtr GetRPtr();
+    RMem GetRPtr();
     size_t GetSize();
     size_t GetMaxSize();
     uintptr_t GetRemoteAddress();
@@ -19,7 +19,7 @@ public:
     void Update();
 
 private:
-    RPtr rPtr;
+    RMem rPtr;
     const uintptr_t remoteAddress;
     const size_t maxSize; // Max Size of dump (not current size)
     std::vector<byte> dumpArray;

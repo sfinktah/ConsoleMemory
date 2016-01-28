@@ -2,7 +2,7 @@
 
 #include "MemDump.h"
 
-MemDump::MemDump(RPtr rPtr) : rPtr(rPtr)
+MemDump::MemDump(RMem rPtr) : rPtr(rPtr)
 {
 }
 
@@ -232,7 +232,7 @@ std::vector<uintptr_t> MemDump::AOBScanArray(AOBScanInfo pattern)
     return results;
 }
 
-RPtr MemDump::GetRPtr()
+RMem MemDump::GetRPtr()
 {
     return rPtr;
 }

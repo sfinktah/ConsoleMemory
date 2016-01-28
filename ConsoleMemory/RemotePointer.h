@@ -100,22 +100,22 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> & vecto
     }
 }
 
-class RPtr
+class RMem
 {
 public:
     const HANDLE pHandle; // Better to make the handle const, to avoid confusion.
 
-    RPtr(HANDLE handle) : pHandle(handle)
+    RMem(HANDLE handle) : pHandle(handle)
     {
 
     }
 
-    static RPtr LocalPtr()
+    static RMem LocalPtr()
     {
-        return RPtr(GetCurrentProcess());
+        return RMem(GetCurrentProcess());
     }
 
-    ~RPtr()
+    ~RMem()
     {
         // Since we are getting parsed the handle instead of creating it, it's better not to close it.
 
@@ -128,8 +128,7 @@ public:
     {
         for (uintptr_t offset : offsets)
         {
-            ptr = Read<uintptr_t>(ptr);
-            ptr += offset;
+            ptr = Read<uintptr_t>(ptr) + offset;
         }
         return ptr;
     }

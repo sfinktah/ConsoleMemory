@@ -24,7 +24,7 @@ void MainLoop()
     HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
     BrickAssert(pHandle != nullptr);
 
-    RPtr ptr(pHandle);
+    RMem ptr(pHandle);
 
     MemDump* memDump = new MemDump(ptr);
 

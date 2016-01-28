@@ -2,7 +2,7 @@
 
 #include "MemBlock.h"
 
-MemBlock::MemBlock(RPtr rPtr, uintptr_t remoteAddress, size_t maxSize) : rPtr(rPtr), remoteAddress(remoteAddress), maxSize(maxSize)
+MemBlock::MemBlock(RMem rPtr, uintptr_t remoteAddress, size_t maxSize) : rPtr(rPtr), remoteAddress(remoteAddress), maxSize(maxSize)
 {
 
 }
@@ -12,7 +12,7 @@ MemBlock::~MemBlock()
 
 }
 
-RPtr MemBlock::GetRPtr()
+RMem MemBlock::GetRPtr()
 {
     return rPtr;
 }

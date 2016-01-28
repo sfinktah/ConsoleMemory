@@ -27,11 +27,11 @@ class MemDump
 private:
     static const DWORD defaultProtFlags = (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE);
 
-    RPtr rPtr;
+    RMem rPtr;
 public:
     std::vector<MemBlockPtr> memBlockList;
     
-    explicit MemDump(RPtr rPtr);
+    explicit MemDump(RMem rPtr);
     ~MemDump();
 
     void Scan(DWORD protectionFlags = defaultProtFlags);
@@ -46,6 +46,6 @@ public:
 
     std::vector<uintptr_t> AOBScanArray(AOBScanInfo pattern);
 
-    RPtr GetRPtr();
+    RMem GetRPtr();
     MemDumpInfo GetInfo();
 };
