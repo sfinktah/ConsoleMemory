@@ -23,11 +23,11 @@ T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
 {
     T temp;
 
-    size_t readAmt = 0;
+    size_t bytesRead = 0;
 
-    BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), &readAmt);
+    BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), &bytesRead);
 
-    BrickAssert(success && (readAmt == sizeof(temp)));
+    BrickAssert(success && (bytesRead == sizeof(temp)));
 
     return temp;
 }
@@ -35,11 +35,11 @@ T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
 template <typename T>
 void WriteRemoteMemory(HANDLE handle, uintptr_t ptr, T & value)
 {
-    size_t wroteAmt = 0;
+    size_t bytesWrote = 0;
 
-    BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), &wroteAmt);
+    BOOL success = WriteProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), &bytesWrote);
 
-    BrickAssert(success && (wroteAmt == sizeof(value)));
+    BrickAssert(success && (bytesWrote == sizeof(value)));
 }
 
 template <typename T>
@@ -159,15 +159,15 @@ public:
     }
 
     template <typename T>
-    T ReadIndex(T* ptr, size_t index)
+    T ReadIndex(uintptr_t ptr, size_t index)
     {
-        return Read<T>(uintptr_t(ptr) + (sizeof(T) * index));
+        return ReadPtr<T>(reinterpret_cast<T*>(ptr) + index);
     }
 
     template <typename T>
-    void WriteIndex(T* ptr, size_t index, T value)
+    void WriteIndex(uintptr_t ptr, size_t index, T value)
     {
-        Write<T>(uintptr_t(ptr) + (sizeof(T) * index), value);
+        WritePtr<T>(reinterpret_cast<T*>(ptr) + index, value);
     }
 
     template <typename T>
@@ -184,19 +184,18 @@ public:
 
     std::string ReadString(uintptr_t ptr, size_t maxLength)
     {
-        std::vector<char> charVector = ReadArray<char>(ptr, maxLength + 1); // +1 for null char
+        std::vector<char> charVector = ReadArray<char>(ptr, maxLength);
+        charVector.push_back('\0');
 
-        charVector.back() = '\0'; // Make sure the array is null terminated
-
-        return std::string(charVector.data()); // Return a string (automatically sized to first null char)
+        return std::string(charVector.data());
     }
 
     void WriteString(uintptr_t ptr, std::string string)
     {
-        std::vector<char> toWrite(string.begin(), string.end());
-        toWrite.push_back('\0');
+        std::vector<char> charVector(string.begin(), string.end());
+        charVector.push_back('\0');
 
-        WriteArray<char>(ptr, toWrite);
+        WriteArray<char>(ptr, charVector);
     }
 
     MEMORY_BASIC_INFORMATION QueryAddress(uintptr_t ptr)

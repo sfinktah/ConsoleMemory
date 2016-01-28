@@ -8,9 +8,9 @@
 
 IniConfig IniConfig::FromString(std::string string)
 {
-    const static std::regex headerRegex     = std::regex("\\[([a-zA-Z0-9 ]+)\\]"); // [ str(0) ]
-    const static std::regex valueRegex      = std::regex("([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9,.]+)"); // str(0) = str(1)
-    const static std::regex whitespaceRegex = std::regex("\\s*");
+    const static std::regex headerRegex     ("\\[([a-zA-Z0-9 ]+)\\]"); // [ str(0) ]
+    const static std::regex valueRegex      ("([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9,.]+)"); // str(0) = str(1)
+    const static std::regex whitespaceRegex ("\\s*");
 
     IniConfig config;
 
