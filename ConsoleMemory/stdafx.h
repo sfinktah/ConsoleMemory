@@ -12,3 +12,5 @@
 #else
 #define LogDebug(format, ...) Log(format, __VA_ARGS__);
 #endif
+
+#define PAUSE system("PAUSE");
