@@ -1,7 +1,5 @@
 #pragma once
 
-#include "BrickAssert.h"
-
 #include <Windows.h>
 
 #include <initializer_list>
@@ -21,15 +19,15 @@ static MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t ad
 template <typename T>
 T ReadRemoteMemory(HANDLE handle, uintptr_t ptr)
 {
-    T temp;
+    T value;
 
     size_t bytesRead = 0;
 
-    BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &temp, sizeof(temp), &bytesRead);
+    BOOL success = ReadProcessMemory(handle, LPVOID(ptr), &value, sizeof(value), &bytesRead);
 
-    BrickAssert(success && (bytesRead == sizeof(temp)));
+    BrickAssert(success && (bytesRead == sizeof(value)));
 
-    return temp;
+    return value;
 }
 
 template <typename T>
@@ -76,7 +74,7 @@ template <typename T>
 void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> & vector)
 {
     size_t itemSize = sizeof(T);
-    size_t maxWriteCount = 8192 / itemSize;
+    size_t maxWriteCount = 8192 / itemSize; // Max of 8KB per write
 
     size_t count = vector.size();
 

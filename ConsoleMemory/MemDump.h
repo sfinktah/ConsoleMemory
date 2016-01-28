@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Windows.h>
-#include <TlHelp32.h>
-
 #include "MemBlock.h"
 #include "AOBScanInfo.h"
 #include "RemotePointer.h"
+
+#include <Windows.h>
+#include <TlHelp32.h>
 
 #define MEM_ALL_ACCESS (\
 PAGE_READONLY          |\

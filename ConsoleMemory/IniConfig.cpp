@@ -49,15 +49,15 @@ IniConfig IniConfig::FromString(std::string string)
 
 IniConfig IniConfig::FromFile(std::string file)
 {
-    std::ifstream inputStream(file);
+    std::ifstream inputStream(file); // Open the file
 
-    BrickAssert(inputStream.is_open() && !inputStream.fail());
+    BrickAssert(inputStream.is_open() && !inputStream.fail()); // Check if the file is open, and there wasnt an error
 
-    std::stringstream bufferStream;
+    std::stringstream bufferStream; // Create a stringstream buffer
 
-    bufferStream << inputStream.rdbuf();
+    bufferStream << inputStream.rdbuf(); // Write the file into the buffer stream
 
-    inputStream.close();
+    inputStream.close(); // Close the file
 
     return FromString(bufferStream.str());
 }

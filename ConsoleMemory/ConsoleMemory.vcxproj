@@ -209,6 +209,17 @@
     </ClCompile>
     <ClCompile Include="UnitTests.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="tunables_impromptu.ini">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="tunables_test.ini">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="tunables_unlocks.ini">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

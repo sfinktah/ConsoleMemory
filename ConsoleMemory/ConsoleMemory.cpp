@@ -8,6 +8,9 @@
 #include "IniConfig.h"
 #include "ProcessFinder.h"
 
+#include <fstream>
+#include <iomanip>
+
 void MainLoop()
 {
     std::string fileName;
@@ -127,11 +130,79 @@ void MainLoop()
     CloseHandle(pHandle);
 }
 
+void DumpTunables()
+{
+    PROCESSENTRY32 processEntry = GetProcessFromName(L"gta5.exe");
+    BrickAssert(processEntry.th32ProcessID != NULL);
+
+    MODULEENTRY32 processModule = GetMainModule(processEntry.th32ProcessID);
+    BrickAssert(processModule.th32ProcessID != NULL);
+
+    HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
+    BrickAssert(pHandle != nullptr);
+
+    RMem ptr(pHandle);
+
+    MemDump* memDump = new MemDump(ptr);
+
+    memDump->ScanModule(processModule);
+
+    AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19", 4);
+
+    uintptr_t tunablesResult = memDump->AOBScan(tunableScan);
+
+    uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 0x4) + 0x8);
+
+    const int dumpSize = 19000;
+
+    char dateBuffer[80];
+    char dateBuffer2[80];
+    time_t timet = time(nullptr);
+    tm tm;
+    localtime_s(&tm, &timet);
+    strftime(dateBuffer, sizeof(dateBuffer), "%d.%m", &tm);
+    strftime(dateBuffer2, sizeof(dateBuffer2), "%R, %d.%m.%y", &tm);
+
+    std::string dateString(dateBuffer);
+    std::string dateString2(dateBuffer2);
+
+    std::ofstream outStream("TunablesDump_" + dateString + ".txt");
+
+    outStream << "Tunables dumped at " << dateString2 << " by Brick's Tunables Dumper" << std::endl << std::endl;
+
+    outStream << "| Offset   | Uint       | Float        | Index |" << std::endl;
+
+    for (int i = 0; i < dumpSize; ++i)
+    {
+        uintptr_t offset = i * 8;
+        uintptr_t addr = tunablesPtr + offset;
+        unsigned int uintValue = ptr.Read<unsigned int>(addr);
+        float floatValue = ptr.Read<float>(addr);
+
+        outStream << "| ";
+        outStream << std::setw(8) << std::setfill('0') << std::uppercase << std::hex << offset;
+        outStream << " | ";
+        outStream << std::setw(10) << std::setfill(' ') << std::dec << uintValue << " | ";
+        outStream << std::setw(12) << std::setfill(' ') << std::dec << floatValue << " | ";
+        outStream << std::setw(5) << std::setfill(' ') << i - 1 << " |";
+        outStream << std::endl;
+    }
+    
+    outStream.flush();
+    outStream.close();
+}
+
+void Test()
+{
+    
+}
+
 int main()
 {
     //TestAll();
 
-    MainLoop();
+    //MainLoop();
+    DumpTunables();
 
     system("PAUSE");
 

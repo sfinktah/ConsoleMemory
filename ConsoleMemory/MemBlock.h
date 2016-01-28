@@ -1,9 +1,10 @@
 #pragma once
 
+#include "RemotePointer.h"
+
 #include <vector>
 #include <memory>
 
-#include "RemotePointer.h"
 
 class MemBlock
 {

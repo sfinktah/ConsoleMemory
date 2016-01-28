@@ -9,6 +9,10 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="Tunables Configs">
+      <UniqueIdentifier>{02875922-6690-40e5-922d-6a3f50623387}</UniqueIdentifier>
+      <Extensions>*.ini</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -64,5 +68,16 @@
     <ClCompile Include="UnitTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tunables_impromptu.ini">
+      <Filter>Tunables Configs</Filter>
+    </None>
+    <None Include="tunables_test.ini">
+      <Filter>Tunables Configs</Filter>
+    </None>
+    <None Include="tunables_unlocks.ini">
+      <Filter>Tunables Configs</Filter>
+    </None>
   </ItemGroup>
 </Project>
