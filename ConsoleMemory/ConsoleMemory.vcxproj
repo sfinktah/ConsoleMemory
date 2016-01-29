@@ -192,6 +192,7 @@
     <ClInclude Include="ProcessFinder.h" />
     <ClInclude Include="RemotePointer.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TunablesDumper.h" />
     <ClInclude Include="UnitTests.h" />
   </ItemGroup>
   <ItemGroup>
@@ -207,13 +208,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TunablesDumper.cpp" />
     <ClCompile Include="UnitTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="tunables_impromptu.ini">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="tunables_test.ini">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="tunables_unlocks.ini">

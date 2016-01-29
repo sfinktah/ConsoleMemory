@@ -2,14 +2,18 @@
 //
 #include "stdafx.h"
 
-#include "UnitTests.h"
-
 #include "MemDump.h"
 #include "IniConfig.h"
 #include "ProcessFinder.h"
 
+#include "UnitTests.h"
+#include "TunablesDumper.h"
+
 #include <fstream>
 #include <iomanip>
+#include <sstream>
+
+#include <regex>
 
 void MainLoop()
 {
@@ -130,79 +134,116 @@ void MainLoop()
     CloseHandle(pHandle);
 }
 
-void DumpTunables()
-{
-    PROCESSENTRY32 processEntry = GetProcessFromName(L"gta5.exe");
-    BrickAssert(processEntry.th32ProcessID != NULL);
 
-    MODULEENTRY32 processModule = GetMainModule(processEntry.th32ProcessID);
-    BrickAssert(processModule.th32ProcessID != NULL);
-
-    HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
-    BrickAssert(pHandle != nullptr);
-
-    RMem ptr(pHandle);
-
-    MemDump* memDump = new MemDump(ptr);
-
-    memDump->ScanModule(processModule);
-
-    AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19", 4);
-
-    uintptr_t tunablesResult = memDump->AOBScan(tunableScan);
-
-    uintptr_t tunablesPtr = ptr.Read<uintptr_t>(uintptr_t(processModule.modBaseAddr) + ptr.Read<int>(tunablesResult + 0x4) + 0x8);
-
-    const int dumpSize = 19000;
-
-    char dateBuffer[80];
-    char dateBuffer2[80];
-    time_t timet = time(nullptr);
-    tm tm;
-    localtime_s(&tm, &timet);
-    strftime(dateBuffer, sizeof(dateBuffer), "%d.%m", &tm);
-    strftime(dateBuffer2, sizeof(dateBuffer2), "%R, %d.%m.%y", &tm);
-
-    std::string dateString(dateBuffer);
-    std::string dateString2(dateBuffer2);
-
-    std::ofstream outStream("TunablesDump_" + dateString + ".txt");
-
-    outStream << "Tunables dumped at " << dateString2 << " by Brick's Tunables Dumper" << std::endl << std::endl;
-
-    outStream << "| Offset   | Uint       | Float        | Index |" << std::endl;
-
-    for (int i = 0; i < dumpSize; ++i)
-    {
-        uintptr_t offset = i * 8;
-        uintptr_t addr = tunablesPtr + offset;
-        unsigned int uintValue = ptr.Read<unsigned int>(addr);
-        float floatValue = ptr.Read<float>(addr);
-
-        outStream << "| ";
-        outStream << std::setw(8) << std::setfill('0') << std::uppercase << std::hex << offset;
-        outStream << " | ";
-        outStream << std::setw(10) << std::setfill(' ') << std::dec << uintValue << " | ";
-        outStream << std::setw(12) << std::setfill(' ') << std::dec << floatValue << " | ";
-        outStream << std::setw(5) << std::setfill(' ') << i - 1 << " |";
-        outStream << std::endl;
-    }
-    
-    outStream.flush();
-    outStream.close();
-}
-
-void Test()
-{
-    
-}
+//struct scrNativeCallContext
+//{
+//    void* m_pReturn;
+//    uint32_t m_nArgCount;
+//    void* m_pArgs;
+//
+//    uint32_t m_nDataCount;
+//};
+//
+//typedef void(__cdecl * NativeHandler)(scrNativeCallContext* context);
+//
+//struct NativeRegistration
+//{
+//    NativeRegistration* nextRegistration;
+//    NativeHandler handlers[7];
+//    uint32_t numEntries;
+//    uint64_t hashes[7];
+//};
+//
+//void DumpNatives()
+//{
+//    PROCESSENTRY32 processEntry = GetProcessFromName(L"gta5.exe");
+//    BrickAssert(processEntry.th32ProcessID != NULL);
+//
+//    MODULEENTRY32 processModule = GetMainModule(processEntry.th32ProcessID);
+//    BrickAssert(processModule.th32ProcessID != NULL);
+//
+//    HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
+//    BrickAssert(pHandle != nullptr);
+//
+//    uintptr_t baseAddress = uintptr_t(processModule.modBaseAddr);
+//
+//    RMem ptr(pHandle);
+//
+//    MemDump* memDump = new MemDump(ptr);
+//
+//    memDump->ScanModule(processModule);
+//
+//    AOBScanInfo tableScan("76 61 49 8B 7A 40 48 8D 0D");
+//
+//    uintptr_t tableResult = memDump->AOBScan(tableScan);
+//
+//    memDump->Free();
+//
+//    uintptr_t tablePtr = tableResult + ptr.Read<DWORD>(tableResult + 9) + 13;
+//
+//    Log("Table Ptr: %I64X", tablePtr);
+//
+//    char dateBuffer[80];
+//    char dateBuffer2[80];
+//    time_t timet = time(nullptr);
+//    tm tm;
+//    localtime_s(&tm, &timet);
+//    strftime(dateBuffer, sizeof(dateBuffer), "%d.%m", &tm);
+//    strftime(dateBuffer2, sizeof(dateBuffer2), "%R, %d.%m.%y", &tm);
+//
+//    std::string dateString(dateBuffer);
+//    std::string dateString2(dateBuffer2);
+//
+//    std::ofstream outStream("NativesDump." + dateString + ".txt");
+//
+//    outStream << "Natives Dumped at " << dateString2 << " by Brick's Native Dumper" << std::endl << std::endl;
+//
+//    std::vector<NativeRegistration*> tableVec = ptr.ReadArray<NativeRegistration*>(tablePtr, 256);
+//
+//    for (NativeRegistration* table : tableVec)
+//    {
+//        NativeRegistration currTable = ptr.ReadPtr(table);
+//
+//        while (true)
+//        {
+//            for (uint32_t i = 0; i < currTable.numEntries; ++i)
+//            {
+//                uint64_t hash = currTable.hashes[i];
+//                NativeHandler handler = currTable.handlers[i];
+//
+//                if ((hash) && (handler))
+//                {
+//                    uintptr_t localAddress = uintptr_t(handler) - baseAddress;
+//
+//                    outStream << "Hash: " << std::setw(16) << std::setfill('0') << std::uppercase << std::hex << hash << " | ";
+//                    outStream << "Address: " << std::setw(8) << std::setfill('0') << std::uppercase << std::hex << localAddress << std::endl;
+//                }
+//            }
+//
+//            if (currTable.nextRegistration)
+//            {
+//                currTable = ptr.ReadPtr(currTable.nextRegistration);
+//            }
+//            else
+//            {
+//                break;
+//            }
+//        }
+//    }
+//
+//    outStream.flush();
+//    outStream.close();
+//}
 
 int main()
 {
+    //MainLoop();
+
+    DumpTunables();
+
     //TestAll();
 
-    //MainLoop();
-    DumpTunables();
+    //DumpNatives();
 
     system("PAUSE");
 

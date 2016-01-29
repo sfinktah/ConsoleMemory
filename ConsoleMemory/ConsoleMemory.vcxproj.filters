@@ -42,6 +42,9 @@
     <ClInclude Include="UnitTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TunablesDumper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -68,12 +71,12 @@
     <ClCompile Include="UnitTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TunablesDumper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="tunables_impromptu.ini">
-      <Filter>Tunables Configs</Filter>
-    </None>
-    <None Include="tunables_test.ini">
       <Filter>Tunables Configs</Filter>
     </None>
     <None Include="tunables_unlocks.ini">
