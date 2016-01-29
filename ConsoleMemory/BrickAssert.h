@@ -1,20 +1,18 @@
 #pragma once
 
-#include <iostream>
-
 #if defined NDEBUG
 #define BrickAssert(expression)                                                                 \
 if (!(expression))                                                                              \
 {                                                                                               \
-    std::cout << "Assertion Failed: " << #expression << std::endl;                              \
+    Log("Assertion Failed: %s", #expression);                                                   \
     abort();                                                                                    \
 }
 #else
 #define BrickAssert(expression)                                                                 \
 if (!(expression))                                                                              \
 {                                                                                               \
-    std::cout << __FILE__ << " line " << __LINE__ << " " << __FUNCTION__ << std::endl;          \
-    std::cout << "Assertion Failed: " << #expression << std::endl;                              \
+    Log("%s line %i %s", __FILE__, __LINE__, __FUNCTION__);                                     \
+    Log("Assertion Failed: %s", #expression);                                                    \
     abort();                                                                                    \
 }
 #endif

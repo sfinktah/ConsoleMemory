@@ -29,19 +29,21 @@ PROCESSENTRY32 GetProcessFromName(std::wstring processName)
     PROCESSENTRY32 processEntry = { };
     processEntry.dwSize = sizeof(processEntry); // Have to set dwSize else Process32First fails
 
-    BrickAssert(Process32First(hProcSnapshot, &processEntry));
-
-    do
+    if (Process32First(hProcSnapshot, &processEntry))
     {
-        if (_wcsicmp(processName.c_str(), processEntry.szExeFile) == 0) // If the strings are equal (ignoring case)
+
+        do
         {
-            CloseHandle(hProcSnapshot);
+            if (_wcsicmp(processName.c_str(), processEntry.szExeFile) == 0) // If the strings are equal (ignoring case)
+            {
+                CloseHandle(hProcSnapshot);
 
-            Log("Found process %s. Process ID: %u", std::string(processName.begin(), processName.end()).c_str(), processEntry.th32ProcessID);
+                Log("Found process %s. Process ID: %u", std::string(processName.begin(), processName.end()).c_str(), processEntry.th32ProcessID);
 
-            return processEntry;
-        }
-    } while (Process32Next(hProcSnapshot, &processEntry));
+                return processEntry;
+            }
+        } while (Process32Next(hProcSnapshot, &processEntry));
+    }
 
     CloseHandle(hProcSnapshot);
 
@@ -57,19 +59,20 @@ MODULEENTRY32 GetProcessModule(DWORD pID, std::wstring moduleName)
     MODULEENTRY32 moduleEntry = { };
     moduleEntry.dwSize = sizeof(moduleEntry); // Have to set dwSize else Module32First fails
 
-    BrickAssert(Module32First(hModSnapshot, &moduleEntry));
-
-    do
+    if (Module32First(hModSnapshot, &moduleEntry))
     {
-        if (_wcsicmp(moduleName.c_str(), moduleEntry.szModule) == 0) // If the strings are equal (ignoring case)
+        do
         {
-            CloseHandle(hModSnapshot);
+            if (_wcsicmp(moduleName.c_str(), moduleEntry.szModule) == 0) // If the strings are equal (ignoring case)
+            {
+                CloseHandle(hModSnapshot);
 
-            Log("Found module %s in process %u. Base Address: 0x%I64X, Size: 0x%X", std::string(moduleName.begin(), moduleName.end()).c_str(), pID, uintptr_t(moduleEntry.modBaseAddr), moduleEntry.modBaseSize);
+                Log("Found module %s in process %u. Base Address: 0x%I64X, Size: 0x%X", std::string(moduleName.begin(), moduleName.end()).c_str(), pID, uintptr_t(moduleEntry.modBaseAddr), moduleEntry.modBaseSize);
 
-            return moduleEntry;
-        }
-    } while (Module32Next(hModSnapshot, &moduleEntry));
+                return moduleEntry;
+            }
+        } while (Module32Next(hModSnapshot, &moduleEntry));
+    }
 
     CloseHandle(hModSnapshot);
 
@@ -108,22 +111,23 @@ MODULEENTRY32 GetAddressInfo(DWORD pID, uintptr_t address)
     MODULEENTRY32 moduleEntry = { };
     moduleEntry.dwSize = sizeof(moduleEntry); // Have to set dwSize else Module32First fails
 
-    BrickAssert(Module32First(hModSnapshot, &moduleEntry));
-
-    do
+    if (Module32First(hModSnapshot, &moduleEntry))
     {
-        uintptr_t moduleBegin = uintptr_t(moduleEntry.modBaseAddr);
-        uintptr_t moduleEnd = moduleBegin + moduleEntry.modBaseSize;
-
-        if ((address > moduleBegin) && (address < moduleEnd)) // If the address is between the start and end of the module
+        do
         {
-            CloseHandle(hModSnapshot);
+            uintptr_t moduleBegin = uintptr_t(moduleEntry.modBaseAddr);
+            uintptr_t moduleEnd = moduleBegin + moduleEntry.modBaseSize;
 
-            Log("Found info for address at 0x%I64X in process 0x%X", address, pID);
+            if ((address > moduleBegin) && (address < moduleEnd)) // If the address is between the start and end of the module
+            {
+                CloseHandle(hModSnapshot);
 
-            return moduleEntry;
-        }
-    } while (Module32Next(hModSnapshot, &moduleEntry));
+                Log("Found info for address at 0x%I64X in process 0x%X", address, pID);
+
+                return moduleEntry;
+            }
+        } while (Module32Next(hModSnapshot, &moduleEntry));
+    }
 
     CloseHandle(hModSnapshot);
 
@@ -136,7 +140,7 @@ MODULEINFO GetModuleInfo(HANDLE hProcess, HMODULE hModule)
 {
     MODULEINFO moduleInfo;
 
-    BOOL success = K32GetModuleInformation(hProcess, hModule, &moduleInfo, sizeof(moduleInfo));
+    BOOL success = GetModuleInformation(hProcess, hModule, &moduleInfo, sizeof(moduleInfo));
 
     BrickAssert(success);
 

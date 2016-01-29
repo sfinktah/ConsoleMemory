@@ -1,6 +1,10 @@
 #pragma once
 
+#define NOMINMAX
+
 #include "BrickAssert.h"
+
+#include <algorithm>
 
 #define Log(format, ...) printf_s(format, ##__VA_ARGS__); printf_s("\n");
 

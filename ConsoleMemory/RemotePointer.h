@@ -2,8 +2,8 @@
 
 #include <Windows.h>
 
-#include <initializer_list>
 #include <vector>
+#include <initializer_list>
 
 static MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t address)
 {
@@ -55,7 +55,7 @@ std::vector<T> ReadRemoteMemoryArray(HANDLE handle, uintptr_t ptr, size_t count)
 
     while (totalRead < count)
     {
-        size_t itemsToRead = min(count - totalRead, maxReadCount);
+        size_t itemsToRead = std::min(count - totalRead, maxReadCount);
         size_t bytesToRead = itemsToRead * itemSize;
 
         size_t bytesRead = 0;
@@ -85,7 +85,7 @@ void WriteRemoteMemoryArray(HANDLE handle, uintptr_t ptr, std::vector<T> & vecto
 
     while (totalWrote < count)
     {
-        size_t itemsToWrite = min(count - totalWrote, maxWriteCount);
+        size_t itemsToWrite = std::min(count - totalWrote, maxWriteCount);
         size_t bytesToWrite = itemsToWrite * itemSize;
 
         size_t bytesWrote = 0;
