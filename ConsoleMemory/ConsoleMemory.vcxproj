@@ -190,6 +190,8 @@
     <ClInclude Include="MemBlock.h" />
     <ClInclude Include="MemDump.h" />
     <ClInclude Include="ProcessFinder.h" />
+    <ClInclude Include="ProcessSearcher.h" />
+    <ClInclude Include="RandomFuncs.h" />
     <ClInclude Include="RemotePointer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TunablesDumper.h" />
@@ -202,6 +204,8 @@
     <ClCompile Include="MemBlock.cpp" />
     <ClCompile Include="MemDump.cpp" />
     <ClCompile Include="ProcessFinder.cpp" />
+    <ClCompile Include="ProcessSearcher.cpp" />
+    <ClCompile Include="RandomFuncs.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

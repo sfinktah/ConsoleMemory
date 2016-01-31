@@ -34,9 +34,9 @@ public:
     explicit MemDump(RMem rPtr);
     ~MemDump();
 
-    void Scan(DWORD protectionFlags = defaultProtFlags);
-    void ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protectionFlags = defaultProtFlags);
-    void ScanModule(MODULEENTRY32 moduleInfo, DWORD protectionFlags = defaultProtFlags);
+    void Dump(DWORD protectionFlags = defaultProtFlags);
+    void DumpRange(uintptr_t baseAddress, size_t regionSize, DWORD protectionFlags = defaultProtFlags);
+    void DumpModule(MODULEENTRY32 moduleInfo, DWORD protectionFlags = defaultProtFlags);
 
     void Update();
     void Free();

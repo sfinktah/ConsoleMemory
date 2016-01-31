@@ -12,6 +12,8 @@ AOBScanInfo::AOBScanInfo(std::string pattern) : AOBScanInfo(pattern, 1)
 
 AOBScanInfo::AOBScanInfo(std::string pattern, int alignment) : byteAlignment(alignment)
 {
+    BrickAssert(alignment > 0);
+
     std::stringstream ss;
     ss << pattern;
 

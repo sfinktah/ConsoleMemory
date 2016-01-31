@@ -1,8 +1,8 @@
 #pragma once
 
-#define NOMINMAX
-
 #include "BrickAssert.h"
+
+#include "RandomFuncs.h"
 
 #include <algorithm>
 

@@ -39,7 +39,7 @@ std::vector<byte> & MemBlock::GetByteDump()
 
 void MemBlock::Update()
 {
-    LogDebug("[MemDump][Scan] Copying 0x%I64X (0x%I64X bytes)", remoteAddress, maxSize);
+    LogDebug("[MemDump][Dump] Copying 0x%I64X (0x%I64X bytes)", remoteAddress, maxSize);
 
     dumpArray = rPtr.ReadArray<byte>(remoteAddress, maxSize);
 }

@@ -2,6 +2,8 @@
 
 #include "MemDump.h"
 
+#include "ProcessSearcher.h"
+
 MemDump::MemDump(RMem rPtr) : rPtr(rPtr)
 {
 }
@@ -11,7 +13,7 @@ MemDump::~MemDump()
     Free();
 }
 
-void MemDump::Scan(DWORD protectionFlags)
+void MemDump::Dump(DWORD protectionFlags)
 {
     Free();
 
@@ -19,11 +21,11 @@ void MemDump::Scan(DWORD protectionFlags)
 
     if (rPtr.pHandle)
     {
-        Log("[MemDump][Scan] Dumping Process ID %u", GetProcessId(rPtr.pHandle));
+        Log("[MemDump][Dump] Dumping Process ID %u", GetProcessId(rPtr.pHandle));
 
         while (true)
         {
-            MEMORY_BASIC_INFORMATION memInfo = rPtr.QueryAddress(addr);
+            MEMORY_BASIC_INFORMATION memInfo = QueryRemoteAddress(rPtr.pHandle, addr);
 
             uintptr_t address = uintptr_t(memInfo.BaseAddress);
 
@@ -55,21 +57,21 @@ void MemDump::Scan(DWORD protectionFlags)
     }
 }
 
-void MemDump::ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protectionFlags)
+void MemDump::DumpRange(uintptr_t baseAddress, size_t regionSize, DWORD protectionFlags)
 {
     Free();
 
-    uintptr_t maxAddress = baseAddress + regionSize;
-
     uintptr_t addr = baseAddress;
+
+    uintptr_t maxAddress = addr + regionSize;
 
     if (rPtr.pHandle)
     {
-        Log("[MemDump][Scan] Dumping Process ID %u", GetProcessId(rPtr.pHandle));
+        Log("[MemDump][Dump] Dumping Process ID %u from 0x%I64X to 0x%I64X", GetProcessId(rPtr.pHandle), addr, maxAddress);
 
-        while (true)
+        while (addr < maxAddress)
         {
-            MEMORY_BASIC_INFORMATION memInfo = rPtr.QueryAddress(addr);
+            MEMORY_BASIC_INFORMATION memInfo = QueryRemoteAddress(rPtr.pHandle, addr);
 
             uintptr_t address = uintptr_t(memInfo.BaseAddress);
 
@@ -86,12 +88,7 @@ void MemDump::ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protecti
 
                 uintptr_t tempaddr = address + size;
 
-                if (tempaddr == addr)
-                {
-                    break;
-                }
-
-                if (tempaddr > maxAddress)
+                if (addr == tempaddr)
                 {
                     break;
                 }
@@ -106,11 +103,11 @@ void MemDump::ScanRange(uintptr_t baseAddress, size_t regionSize, DWORD protecti
     }
 }
 
-void MemDump::ScanModule(MODULEENTRY32 moduleInfo, DWORD protectionFlags)
+void MemDump::DumpModule(MODULEENTRY32 moduleInfo, DWORD protectionFlags)
 {
     BrickAssert(moduleInfo.th32ProcessID == GetProcessId(rPtr.pHandle)); // Make sure module is in current process
 
-    return ScanRange(uintptr_t(moduleInfo.modBaseAddr), moduleInfo.modBaseSize, protectionFlags);
+    return DumpRange(uintptr_t(moduleInfo.modBaseAddr), moduleInfo.modBaseSize, protectionFlags);
 }
 
 void MemDump::Update()
