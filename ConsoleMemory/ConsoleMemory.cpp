@@ -75,7 +75,7 @@ void EditTunables(std::string fileName)
 
 int main(int argc, char* argv[ ])
 {
-    std::cout << "Enter Command (edit, sort, dump): ";
+    std::cout << "Enter Command (edit, dump, sort, enum): ";
     std::string command;
     std::cin >> command;
 
