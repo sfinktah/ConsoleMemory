@@ -6,6 +6,8 @@
 #include <sstream>
 #include <fstream>
 
+#define IS_STREAM_VALID(stream) (stream.is_open() && stream.good() && !stream.fail())
+
 IniConfig IniConfig::FromString(std::string string)
 {
     const static std::regex headerRegex     ("\\[([a-zA-Z0-9 ]+)\\]"); // [ str(0) ]
@@ -51,7 +53,7 @@ IniConfig IniConfig::FromFile(std::string file)
 {
     std::ifstream inputStream(file); // Open the file
 
-    BrickAssert(inputStream.is_open() && !inputStream.fail()); // Check if the file is open, and there wasnt an error
+    BrickAssert(IS_STREAM_VALID(inputStream)); // Check if the file is open, and there wasnt an error
 
     std::stringstream bufferStream; // Create a stringstream buffer
 
@@ -88,7 +90,7 @@ void IniConfig::SaveToFile(std::string fileName)
 {
     std::ofstream fileStream(fileName);
 
-    BrickAssert(fileStream.is_open());
+    BrickAssert(IS_STREAM_VALID(fileStream));
 
     fileStream << ToString();
 

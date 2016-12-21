@@ -7,6 +7,9 @@ MEMORY_BASIC_INFORMATION QueryRemoteAddress(HANDLE hProcess, uintptr_t address)
 
     size_t written = VirtualQueryEx(hProcess, LPVOID(address), &memInfo, sizeof(memInfo));
 
+	if (!written)
+		return memInfo;
+
     BrickAssert(written == sizeof(memInfo));
 
     return memInfo;

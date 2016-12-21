@@ -29,11 +29,28 @@ void MemDump::Dump(DWORD protectionFlags)
 
             uintptr_t address = uintptr_t(memInfo.BaseAddress);
 
+			if (!memInfo.RegionSize)
+				break;
+
             size_t size = memInfo.RegionSize;
 
             if (size > 0)
             {
-                if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
+				// Below are flags about the current region of memory. If you want to specifically scan for only 
+				// certain things like if the area is writable, executable, etc. you can use these flags to prevent 
+				// reading non-desired protection types. 
+
+				auto isCopyOnWrite = ((memInfo.Protect & PAGE_WRITECOPY) != 0 || (memInfo.Protect & PAGE_EXECUTE_WRITECOPY) != 0);
+				auto isExecutable = ((memInfo.Protect & PAGE_EXECUTE) != 0 || (memInfo.Protect & PAGE_EXECUTE_READ) != 0 || (memInfo.Protect & PAGE_EXECUTE_READWRITE) != 0 || (memInfo.Protect & PAGE_EXECUTE_WRITECOPY) != 0);
+				auto isWritable = ((memInfo.Protect & PAGE_READWRITE) != 0 || (memInfo.Protect & PAGE_WRITECOPY) != 0 || (memInfo.Protect & PAGE_EXECUTE_READWRITE) != 0 || (memInfo.Protect & PAGE_EXECUTE_WRITECOPY) != 0);
+
+
+				if (
+					// My Assertions
+					(memInfo.State == MEM_COMMIT && ((memInfo.Protect & PAGE_GUARD) == 0) && ((memInfo.Protect & PAGE_NOACCESS) == 0)) &&
+					// Brick's Assertions
+					(memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags)
+					)
                 {
                     MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, address, size));
                     mB->Update();
@@ -81,6 +98,7 @@ void MemDump::DumpRange(uintptr_t baseAddress, size_t regionSize, DWORD protecti
             {
                 if ((memInfo.State & MEM_COMMIT) && (memInfo.Protect & protectionFlags))
                 {
+
                     MemBlockPtr mB = MemBlockPtr(new MemBlock(rPtr, address, size));
                     mB->Update();
                     memBlockList.push_back(mB);
@@ -126,7 +144,7 @@ void MemDump::Free()
     {
         Log("[MemDump][Free] Deleting %I64u blocks", size);
 
-        memBlockList.clear(); // Shared Ptr auto calls MemBlock destructor.
+        memBlockList.clear(); // Shared Ptr auto-calls MemBlock destructor.
     }
 }
 

@@ -12,7 +12,7 @@ if (!(expression))                                                              
 if (!(expression))                                                                              \
 {                                                                                               \
     Log("%s line %i %s", __FILE__, __LINE__, __FUNCTION__);                                     \
-    Log("Assertion Failed: %s", #expression);                                                    \
+    Log("Assertion Failed: %s", #expression);                                                   \
     abort();                                                                                    \
 }
 #endif

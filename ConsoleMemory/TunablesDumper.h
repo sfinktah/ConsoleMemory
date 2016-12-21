@@ -4,6 +4,7 @@
 #include <string>
 
 void DumpTunables(std::string fileName);
+void DumpIda(std::string baseName);
 
 std::map<int, std::string> GetKnownTunables();
 

@@ -15,9 +15,55 @@
 
 #include <regex>
 
+void DumpIda(std::string baseName)
+{
+    if (baseName.empty())
+    {
+        std::cout << "Enter Output File Name: ";
+        std::cin >> baseName;
+    }
+
+    PROCESSENTRY32 processEntry = GetProcessFromName(L"gta5.exe");
+    BrickAssert(processEntry.th32ProcessID != NULL);
+
+    //MODULEENTRY32 processModule = GetMainModule(processEntry.th32ProcessID);
+    MODULEENTRY32 processModule = GetProcessModule(processEntry.th32ProcessID, L"gta5.exe");
+    BrickAssert(processModule.th32ProcessID != NULL);
+
+    HANDLE pHandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, processEntry.th32ProcessID);
+    BrickAssert(pHandle != nullptr);
+
+	RMem ptr(pHandle);
+
+	MemDump memDump (ptr);
+
+	memDump.Dump();
+
+	for (const auto& block : memDump.memBlockList)
+	{
+		char hexstring[256];
+		sprintf_s<256>(hexstring, "%s_0x%012llx.dmp", baseName.c_str(), block->GetRemoteAddress());
+		Log("Dumping %s\n", hexstring);
+		// Need to make filename out of BASENAME + memory location
+		std::string fileName(hexstring);
+
+		std::ofstream outfile(fileName, std::ios::out | std::ios::binary); 
+		std::vector<byte> data = block->GetByteDump();
+		outfile.write((const char*)data.data(), data.size());
+		outfile.flush();
+		outfile.close();
+	}
+
+	CloseHandle(pHandle);
+
+    // const int dumpSize = 19000;
+
+}
+
+
 void DumpTunables(std::string fileName)
 {
-    if (fileName.length() == 0)
+    if (fileName.empty())
     {
         std::cout << "Enter Output File Name: ";
         std::cin >> fileName;
@@ -26,10 +72,11 @@ void DumpTunables(std::string fileName)
     PROCESSENTRY32 processEntry = GetProcessFromName(L"gta5.exe");
     BrickAssert(processEntry.th32ProcessID != NULL);
 
-    MODULEENTRY32 processModule = GetMainModule(processEntry.th32ProcessID);
+    //MODULEENTRY32 processModule = GetMainModule(processEntry.th32ProcessID);
+    MODULEENTRY32 processModule = GetProcessModule(processEntry.th32ProcessID, L"gta5.exe");
     BrickAssert(processModule.th32ProcessID != NULL);
 
-    HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
+    HANDLE pHandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, processEntry.th32ProcessID);
     BrickAssert(pHandle != nullptr);
 
     RMem ptr(pHandle);
@@ -43,6 +90,7 @@ void DumpTunables(std::string fileName)
     AOBScanInfo tunableScan("48 8B 8C C2 ? ? ? ? 48 85 C9 74 19");
 
     uintptr_t tunablesResult = memDump->AOBScan(tunableScan);
+    BrickAssert(tunablesResult != NULL);
 
     memDump->Free();
 
@@ -130,21 +178,16 @@ void SortTunableDump(std::string listName, std::string outputName)
 {
     std::ifstream inputStream(listName);
 
-    const static std::regex pairRegex("^\\s*([a-zA-Z0-9_?]+)\\s*=\\s*(\\d+)[,]\\s*?$");
+    const static std::regex pairRegex   ("^\\s*([a-zA-Z0-9_?]+)\\s*=\\s*(\\d+)[,]\\s*?$");
     const static std::regex unNamedRegex("^\\s*(0x[a-zA-Z0-9]{0,8})\\s*=\\s*(\\d+)[,]\\s*?$");
 
     std::ifstream inStream(listName);
-
-    std::stringstream bufferStream;
-    bufferStream << inStream.rdbuf();
-
-    inStream.close();
 
     std::vector<tunablePair> tunablePairList;
 
     std::string currentLine;
 
-    while (std::getline(bufferStream, currentLine, '\n'))
+    while (std::getline(inStream, currentLine, '\n'))
     {
         std::smatch match;
         std::smatch unMatch;
@@ -162,11 +205,12 @@ void SortTunableDump(std::string listName, std::string outputName)
         }
     }
 
+    inStream.close();
+
     std::cout << "Sorting " << tunablePairList.size() << " tunables" << std::endl;
 
     std::sort(tunablePairList.begin(), tunablePairList.end(), 
     [ ] (tunablePair pair1, tunablePair pair2)
-
     { 
         return pair1.index < pair2.index;
     });

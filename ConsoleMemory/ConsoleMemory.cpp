@@ -14,7 +14,7 @@
 
 void EditTunables(std::string fileName)
 {
-    if (fileName.length() == 0)
+    if (fileName.empty())
     {
         std::cout << "Enter Tunables Config Name: ";
         std::cin >> fileName;
@@ -25,10 +25,10 @@ void EditTunables(std::string fileName)
     PROCESSENTRY32 processEntry = GetProcessFromName(L"gta5.exe");
     BrickAssert(processEntry.th32ProcessID != NULL);
 
-    MODULEENTRY32 processModule = GetMainModule(processEntry.th32ProcessID);
+    MODULEENTRY32 processModule = GetProcessModule(processEntry.th32ProcessID, L"gta5.exe");
     BrickAssert(processModule.th32ProcessID != NULL);
 
-    HANDLE pHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processEntry.th32ProcessID);
+    HANDLE pHandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, processEntry.th32ProcessID);
     BrickAssert(pHandle != nullptr);
 
     RMem ptr(pHandle);
@@ -51,16 +51,16 @@ void EditTunables(std::string fileName)
     {
         for (IniValuePair valuePair : config["float"])
         {
-            int index = std::stoi(valuePair.first);
-            float value = std::stof(valuePair.second);
+            auto index = std::stoi(valuePair.first);
+            auto value = std::stof(valuePair.second);
             Log("Writing tunable %f at index %i", value, index);
             ptr.Write(tunablesPtr + (index * 8), value);
         }
 
         for (IniValuePair valuePair : config["int"])
         {
-            int index = std::stoi(valuePair.first);
-            int value = std::stoi(valuePair.second);
+            auto index = std::stoi(valuePair.first);
+            auto value = std::stoi(valuePair.second);
             Log("Writing tunable %i at index %i", value, index);
             ptr.Write(tunablesPtr + (index * 8), value);
         }
@@ -75,7 +75,7 @@ void EditTunables(std::string fileName)
 
 int main(int argc, char* argv[ ])
 {
-    std::cout << "Enter Command (edit, dump, sort, enum): ";
+    std::cout << "Enter Command (edit, dump, sort, enum, ida): ";
     std::string command;
     std::cin >> command;
 
@@ -88,6 +88,17 @@ int main(int argc, char* argv[ ])
         else
         {
             EditTunables("");
+        }
+    }
+    else if (command == "ida")
+    {
+        if (argc == 2)
+        {
+            DumpIda(argv[1]);
+        }
+        else
+        {
+            DumpIda("");
         }
     }
     else if (command == "dump")
