@@ -48,8 +48,7 @@ void DumpIda(std::string baseName)
 		std::string fileName(hexstring);
 
 		std::ofstream outfile(fileName, std::ios::out | std::ios::binary); 
-		std::vector<byte> data = block->GetByteDump();
-		outfile.write((const char*)data.data(), data.size());
+		outfile.write((const char*)std_container.data(), std_container.size());
 		outfile.flush();
 		outfile.close();
 	}

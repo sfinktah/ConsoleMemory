@@ -25,7 +25,7 @@ struct MemDumpInfo
 class MemDump
 {
 private:
-    static const DWORD defaultProtFlags = (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE);
+    static const DWORD defaultProtFlags = (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_READONLY | PAGE_READWRITE );
 
     RMem rPtr;
 public:
